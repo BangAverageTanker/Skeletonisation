@@ -1,0 +1,57 @@
+9 Support Code
+
+9.1 Background
+
+This chapter offers a brief discussion of the code that makes up the 
+executable program modules.  These include the functions in the misc.c file 
+and the functions in the relevant program module files for each algorithm.
+
+9.2 File structure
+
+To create an executable for each file involves the use of several source 
+files.  These are (substituting xxx for the algorithm name) ;
+
+xxx_Module.c - This is the driver program code, which links in all of the 
+other source code files.
+
+xxx.c - This file contains the actual code for each individual algorithm, as 
+discussed in chapters 4 to 9.
+
+misc.h, misc.c - These files contain the function prototypes and 
+definitions for miscellaneous functions used throughout the code.
+
+rasterfileh, rasterfile.c - These files contain the code for the 
+loading and saving of Sun Rasterfiles.
+
+9.3 Functions in 'Misc.c'
+
+void Draw_Image (FILE *) - this function is used to draw/save the 
+ASCII versions of the processed image.  The argument is a UNIX file 
+descriptor, with stdio used when the image is to be sent to the screen.
+
+void Clear_Image(void) - this function is used to set each value in the 
+array image to zero.
+
+void Image_2_Old_Image(void) - this copies the entire array image 
+to the array old_image.
+
+void Old_Image_2_Image(void) - this copies the entire array 
+old_image to the array image.
+void All(void) - this function is used to print the image after each 
+iteration.
+
+int IsEven(int) - This function returns whether the argument is even 
+or not.
+
+void Invert(void) - This is used to swap the values of the pixels in an 
+image.  This is needed as most of the algorithms assume zero to be 
+background data and one to be image data, but it is a requirement of the 
+project to have one to be the background data and zero to be the image 
+data. 
+
+void Usage (char *, char *) - This function prints out usage 
+information on how to use this executables, as well as an appropriate error 
+message as why the program failed to work.
+
+The source code for these functions can be found in appendix B.
+

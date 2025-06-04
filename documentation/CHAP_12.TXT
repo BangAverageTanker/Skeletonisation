@@ -1,0 +1,38 @@
+REFERENCES
+
+[1]	Chin et al.		A Comparison Of Some One-pass Thinnings, Pattern 
+				Recognition Letters, Volume 11,  Number 1 
+				(January 1990), Pages 35 - 41
+[2]	Coad P &		Object-Oriented Design, Yourdon Press Computing Series, 
+	Yourdon E		1991.
+[3]	Hall R W		Fast Parallel Thinning Algorithms: Parallel Speed and 
+				Connectivity Preservation,  Communications of the ACM, 
+				Volume 32, Number 1 (January 1989),
+				Pages 124 - 131.
+[4]	Holt et al.		An Improved Parallel Thinning Algorithm, 	
+			Communications of the ACM, Volume 30, Number 2 	
+			(February 1987), Pages 156 - 160	
+[5]	Kernigan B W	&	The C Programming Language, Prentice-Hall Software
+	Richie D M 		Series, 1978.
+[6]	Lam et al.		Thinning Methodologies - A Comprehensive Survey, IEEE 
+				Transactions on Pattern Analysis and Machine 
+				Intelligence, Volume 14, Number 9 (September 1992), 
+				Pages 869 - 885
+[7]	Levine J R &		Graphics File Formats, McGraw-Hill.
+	Kay D C	
+[8]	Lu H E &		A Comment On "A Fast Parallel Algorithm For Thinning 
+	Wang P S P		Digital Patterns", Communications of the ACM,
+				Volume 29 Number 3 (March 1986), Pages 239 - 242.
+[9]	Olszewski J		A Flexible Thinning Algorithm Allowing Parallel, 
+				Sequential, and Distributed Application, ACM 
+				Transactions on Mathematical Software, Volume 18
+				Number 1 (March 1992), Pages 35 - 45.
+[10]	Stewart A		A One-pass Thinning Algorithm with Interference 
+				Guards,  Pattern Recognition Letters 15, Elsevier Science 
+				Publishers (August 1994), Pages 825 - 832.
+[11]	Suen C Y &		A Fast Parallel Algorithm For Thinning Digital Patterns, 
+	Zhang T Y		Communications of the ACM, Volume 27 Number 3
+				(March 1984), Pages 236 - 239.
+[12]	Wu R Y &		A New One-Pass Parallel Thinning Algorithm For Binary
+	Tsai W H		Images, Pattern Recognition Letters 13, Elsevier Science 
+				Publishers (October 1992), Pages 715 - 723.

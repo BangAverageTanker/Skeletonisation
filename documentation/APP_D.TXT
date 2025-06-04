@@ -1,0 +1,45 @@
+Appendix D - Project Specification
+
+WESTERBY Simon Neil
+CS
+SKELETONISATION OF MONOCHROMATIC IMAGES
+DODDS E
+1995
+
+A well known problem of pattern recognition is that of the effectiveness 
+and efficiency of extracting the distinctive features of a pattern.  By 
+thinning an image it becomes easier to identify these distinctive patterns.
+
+The aim of this project is to implement and test several thinning 
+algorithms, based on the widely used method suggested by Zhang and 
+Suen (1984), and to find the most appropriate, with a particular interest in 
+the thinning of images of cell structures.
+
+The first stage of the project  will be to decide which of the supplied 
+algorithms to implement.  The next stage will be to implement the given 
+algorithms on a computer system (currently in ANSI 'C' on the University 
+SUNs).  The algorithms supplied are in a very basic form, so some 
+extensive work will have to be done to produce algorithms that are easier 
+to translate into code.
+
+After this the next stage will be too test the effectiveness of the 
+implemented algorithms on a variety of images (including a simulated cell 
+structure) of varying complexity.  The images chosen will be the same for 
+each algorithm.  The hope is to implement around five  of the supplied 
+algorithms, with a minimum objective of implementing at least three.
+
+As this is an on-going area of study, with new work being done all the 
+time, it is possible that newer, better algorithms will be produced, during 
+the period of the project, which may be implemented instead of some of the 
+supplied algorithms. 
+ 
+Some of the supplied algorithms also suggest a distributed or parallel 
+processing approach, which may be investigated  if there is any time 
+available towards the end of the project.
+A proposed timetable is to finish between 1 - 3 of the supplied algorithms 
+before the Interim report, with any others implemented.  Simple testing 
+will be performed on the algorithms shortly after each is completed, with a 
+comprehensive comparison of the algorithms performed towards the end of 
+the project.
+
+

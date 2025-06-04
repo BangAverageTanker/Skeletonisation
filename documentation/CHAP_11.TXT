@@ -1,0 +1,34 @@
+11 Conclusion
+
+11.1 Overall effectiveness
+
+The testing shows that all but one of the implemented algorithms could be 
+used successfully to thin monochromatic images of cell structures.  Of 
+those that work, the best is Stewarts algorithm.  This creates well 
+connected skeletons, with no erosion, and is the fastest of the implemented 
+algorithms. 
+
+11.2 Aims of the project
+
+The aims of the project have been met, with five algorithms implemented.  
+Each has been tested on the same test data, with particular interest in the 
+results from images of cell structures.
+
+However, no newer algorithms were implemented then those initially 
+supplied , due to some selected algorithms not becoming available before 
+the end of the project.  One such newer algorithm was suggested in the 
+article 'Proceedings of the 12th IAPR International Conference on Pattern 
+Recognition', volume 1, pages 546-8.  This article was published in the last 
+quarter of 1995 and so is significantly newer then any of those 
+implemented.
+
+11.3 Constraints
+
+The only constraint of this project was the use of zero as image data, and 
+one as background data.  All of the implemented algorithms are able to 
+produce images in this form.  The implemented algorithms can produce 
+the data in either SUN rasterfile format, or ASCII text.  The user is able 
+to view the skeletonisation process at the iterative level, with differing 
+levels of information available depending on the algorithm (see appendix 
+C - users guide).  This could help if any modifications to the algorithms 
+were intended.

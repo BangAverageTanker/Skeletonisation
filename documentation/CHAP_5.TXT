@@ -1,0 +1,86 @@
+5 Lu and Wang's Algorithm
+
+5.1 Background
+
+This is not an algorithm as such, but some suggested corrections and 
+modifications to Suen and Zhangs algorithm (Chapter 4.)  Published in 
+March 1986, two years after 
+Suen and Zhangs article, this 
+paper highlights the error within 
+the flowchart (as noted in 
+Chapter 4 and Figure 5.1) as well 
+as some unwanted 
+disadvantages.
+
+4.2 Disadvantages
+
+In Figure 5.2 is the character 'H' 
+with a small amount of noise.  It 
+can be seen that this noise has 
+not been deleted at the end of the 
+iterations, but has in fact been 
+enlarged.
+
+Some thing that is more 
+disturbing is the fact that some images can be completely eroded away to 
+nothing.   Figure 5.3 shows a grid of 2x2 square patterns.  There are no 
+skeletons shown in this image as they have been completely eroded.  
+Extreme erosion can also occur as shown in figure 5.4 (a).  It can be shown 
+
+
+
+
+
+
+
+
+
+
+
+
+that is will cause any two pixel wide (or any line that could be thinned 
+down to such a line) diagonal line to be thinned down to just two points 
+(see Figure 5.5 (a).)
+
+5.3 Partial 
+Solutions
+
+The Solution to the 
+erosion of diagonal 
+lines is to replace 
+the condition 
+  (a) 2 < B(P1) < 6
+with the condition
+  (a) 3 < B(P1) < 6.
+This will allow the 
+non-deletion of a set of end points (Figure 5.6) which should not be deleted.  
+The result of this modification is shown in Figures 5.4 (b) and 5.5 (b) 
+where the Suen and Zhangs algorithm destroyed the image structure.
+
+No solutions were offered to the problems of noise immunity or the 
+complete erosion of images.
+
+5.4 Modifying the code
+
+The modification to the code is minimal, with only the following function 
+being altered :
+
+1	int SZ2_Condition_A(int i, int j)
+2	{
+3	   int No_Ones = 0 ;
+4	   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+5
+6	   No_Ones = P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 ;
+7
+8	   return ((No_Ones <= 6) && (No_Ones >= 3)) ;
+9	}
+
+The only alteration in this function is the changing of the value 2 in line 8 
+to a value of 3.  
+
+5.5 Initial conclusions
+
+This algorithm offers a solution to one of the problems with [11] as well as 
+clarifying several ambiguities.  This algorithm performs practically 
+identically to [11], but with a speed increase in certain cases where 
+excessive erosion has been removed, and so seems ideal for our purposes. 

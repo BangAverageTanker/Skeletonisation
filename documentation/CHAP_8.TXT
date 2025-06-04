@@ -1,0 +1,201 @@
+8 Holt et al.'s Algorithm
+
+8.1 Background
+
+This algorithm is a modification of Suen and Zang [11].  Like Wu and Tsai[12] 
+and Stewart[10] this is, however, a one-pass algorithm.  It dispenses with 
+the need for a directional bias by introducing edge information for the 
+current pixels eight neighbours (N, S, etc.).
+
+8.2 Deletion criteria
+
+A basic test for whether a pixel should be deleted is whether or not the 
+pixel is on the edge of the image.   However a parallel algorithm must also 
+obey the following constraints;
+
+(a)	The removal of the edge of a line must not remove the entire line.
+(b) 	All four elements of an isolated 2x2 square should not be deleted.
+(c)	The connectedness of the overall structure must not be altered by 
+	the parallel removal of some of the pixels.
+
+Therefore several conditions must be used to ensure these are met.  These 
+conditions are satisfied in Suen and Zhang[11], to some extent, by using the 
+directional bias.  In this algorithm they are met by using protection 
+conditions, as in Stewart[10].
+
+8.3 The edge 
+function
+
+The article contains a 
+PASCAL-like pseudo 
+code implementation 
+of the edge function as 
+shown in Figure 8.1.  
+This has the same 
+effect as condition (a) 
+in Suen and Zhang[11], 
+i.e. an edge has 
+between two and six 
+connected neighbours.  This edge information can then be used in the 
+protection conditions, which determines whether a pixel should be deleted.
+
+8.4 Protection conditions
+
+A vertical line two pixels wide is guarded by keeping one of its edges.  
+Since Suen and Zhang[11] use a westward bias then  it seems appropriate to 
+preserve the west edge .   Such an edge is preserved if its not on a corner 
+and its east neighbour (E) is also on the edge, thus (using the same 
+notation as in the last chapter)
+
+edge(E).N.S
+
+Similarly the North edge of a two pixel wide horizontal line can be 
+protected by
+
+edge(S).E.W
+
+A 2x2 square can be protected if its south, east and southeast neighbours 
+are all on the edge, thus
+
+edge(E).edge(S).edge(SE)
+
+Combining the protection conditions with the initial deletion criteria gives 
+the expression,
+
+C.(-edge(C) +
+   (edge(E).N.S)+
+   (edge(S).W.E)+
+   (edge(E).edge(S)edge(SE))
+
+8.5 Discussion of the execution cycle
+
+This algorithm performs in a very similar manner to Stewart[10].  Each 
+pixel is checked iteratively.  The pixel is removed if it is black, on the edge 
+(i.e. the edge function returns true) and non of the protection conditions 
+are true.  This process repeats until no pixels are removed in an iteration.
+8.6 Pseudo code
+
+The main body of the pseudo code for this algorithm is identical to  that of 
+Stewart[10].
+
+Holt et al. Thin Image
+	Repeat
+		For each row in the image
+			For each column in the image
+				If the current pixel is on the edge of the image
+					If the current pixel is not protected
+						Delete current pixel
+					End if
+				End if
+			Next Column
+		Next Row
+	Until the image not altered
+End Hole et al. Thin Image
+
+8.7 Implementation
+
+This is another relatively easy to implement algorithm.  The edge function 
+was easy to implement from the given pseudo code, as were the protection 
+conditions.
+
+The image matrices were implemented as in the previous algorithms.  Two 
+sets of preprocessor definitions were also used.  The first was along the 
+lines
+
+#define C	old_image[i][j]
+#define N	old_image[i][j-]
+.
+.
+#define NW	old_image[i-1][j-1]
+
+and the second like
+
+#define c	i, j
+#define n	i, j-1
+.
+.
+#define nw 	i-1, j-1
+
+These are used throughout the code to improve its' readability.
+
+8.7.1 The HSCP_Check() and HSCP_Edge() functions
+
+1	void HSCP_Check(int v1, int v2, int v3)
+2	{
+3	   extern int t00, t01, t01s, t11 ;
+4
+5	   if ((v2 == WHITE) && ((v1 == WHITE) || (v3 == WHITE)))
+6	   {
+7	      t00 = TRUE ;
+8	   }
+9	   if ((v2 == BLACK) && ((v1 == BLACK) || (v3 == BLACK)))
+10	   {
+11	      t11 = TRUE ;
+12	   }
+13	   if (((v1==WHITE)&&(v2==BLACK))||((v2==WHITE)&&(v3==BLACK)))
+14	   {
+15	      t01s = t01 ;
+16	      t01 = TRUE ;
+17	   }
+18	   return ;
+19	}
+
+1	int HSCP_Edge(int i, int j)
+2	{
+3	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+4	
+5	   int edge = 0 ;
+6	   extern int t00 ;
+7	   extern int t01 ;
+8	   extern int t01s ;
+9	   extern int t11 ;
+10
+11	   t00 = FALSE ;
+12	   t01 = FALSE ;
+13	   t01s = FALSE ;
+14	   t11 = FALSE ;   
+15
+16	   HSCP_Check (NW, N, NE) ;
+17	   HSCP_Check (NE, E, SE) ;
+18	   HSCP_Check (SE, S, SW) ;
+19	   HSCP_Check (SW, W, NW) ;
+20
+21	   edge=((C==BLACK)&&(t00==TRUE)&&(t11==TRUE)&&(t01s==FALSE)) ;
+22   
+23	   return (edge) ;
+24	}
+
+The HSCP_Check() function is used to determine the number of connected 
+neighbours on any one of the four sides of the 3x3 square made up of the 
+current pixel and its neighbours.  The four variables t00, t01, t01s and t11 
+are used to represent the number of connected sides.  t00 is set to true if 
+there are any pairs of zero connected neighbours (i.e. two of the neighbours 
+on one side next to each other are both zero).  t11 is set to true if there are 
+any pairs of one connected neighbours (i.e. two of the neighbours on a side 
+next to each other are both one).  t01 is set to true if there is one (and only 
+one) zero-one connected pair of neighbours.  Finally t01s is used to indicate 
+if there is more then one set of zero-one connected pairs in the entire set of 
+neighbours.  If there is one zero-one connected pair, then the value t01s is 
+set to the old value of t01. If there were no previously detected pairs, then 
+it is set to false, otherwise it is set to true.
+
+The HSCP_Edge() function then uses these four variables to determine if 
+the pixel is on the edge of the image.  Each of the four sides of the 3x3 
+matrix of neighbours is checked, and thee image is determined to be on the 
+edge if there is at least one zero connected pair (t00 equals true), there is 
+at least one one connected pair (t11 equals true) and there is only one pair 
+of zero-one connected pair is found (t01s equals false). 
+
+The rest of the code for this algorithm can be found in appendix A under 
+the file HSCP.c.
+
+8.8 Initial testing
+
+Again, on completion this algorithm was tested on the character 'H' and 
+cell-like images, with the results shown in figures 8.2 and 8.3 respectively.
+
+8.9 Initial conclusions
+
+The initial testing shows that this is another algorithm that is well suited 
+for our purposes.
+

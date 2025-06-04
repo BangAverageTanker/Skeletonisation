@@ -1,0 +1,9 @@
+mkdir -p bin/
+gcc Hall_mod.c -o bin/Hall_mod
+gcc HCSP_mod.c -o bin/HCSP_mod
+gcc HSCP_mod.c -o bin/HSCP_mod
+gcc SHOW_mod.c -o bin/SHOW_mod
+gcc Stewart_mod.c -o bin/Stewart_mod
+gcc S_Z_1_mod.c -o bin/S_Z_1_mod
+gcc S_Z_2_mod.c -o bin/S_Z_2_mod
+gcc WuTsai_mod.c -o bin/WuTsai_mod

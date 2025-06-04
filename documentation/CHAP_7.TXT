@@ -1,0 +1,220 @@
+7 Stewarts Algorithm
+
+7.1 Background
+
+As in Chapter 5, this is not an algorithm as such, but a modification to the 
+previous chapters algorithm, by Wu and Tsai [12].  This is achieved by 
+introducing some protection conditions which do not allow parallel 
+thinning to lead to the erosion of vertical line segments.  The algorithm by 
+Wu and Tsai (Chapter 6) defines a set of removal conditions as templates 
+(see section 6.2).  However, four of these templates (e, f, h and i) will allow 
+the parallel removal of an isolated square.  Suen and Zhangs[11] algorithm 
+(Chapter 4) and the modifications by Lu and Wang[8] (Chapter 5) also 
+suffer from this problem, but to a lesser degree due to them using the 
+directional bias introduced using two sub-iterations.
+
+7.2 Modified templates used
+
+These are the modified templates used.
+
+Template 1 (and its four 90o rotations) 
+	1 0 0	0 0 0	0 0 1	1 1 1
+	1 c 0	0 c 0	0 c 1	0 c 0
+	1 0 0	1 1 1	0 0 1	0 0 0
+
+Template 2 (and its four 90o rotations) 
+	1 1 x	x 0 x	x 1 1	1 1 1
+	1 c 0	1 c 1	0 c 1	1 c 1
+	1 1 x	1 1 1	x 1 1	x 0 x
+
+Template 3 (and its four 90o rotations) 
+	x 0 0	0 0 x	x 1 x	x 1 x
+	1 c 0	0 c 1	0 c 1	1 c 0
+	x 1 x	x 1 x	0 0 x	x 0 0
+
+where c is the currently tested pixel, 0 is a white pixel, 1 is a black pixel, x  
+can be either a black pixel or a white pixel, and the set of pixels denoted by 
+a z (in a given template) must contain at least one black pixel.
+
+Rather then use the 
+previously used 
+notation of referring 
+to the pixel and its 
+neighbours as points 
+P1 to P9, each of the 
+neighbours is 
+referred to by its 
+compass position 
+from the centre C 
+(see Figure 7.1.)
+
+7.3 Using the templates
+
+Each of the templates (and its three rotations) are considered in turn.  
+Each is transformed into a collection of boolean (or logical) expressions 
+with each pixel relating to a logical expression (NOTE White pixels  
+evaluate to false, while black pixels evaluate to true.)
+
+e.g.  Each of the templates have a common middle row (0 c 1), thus a 
+corresponding boolean expression is;
+
+c . (W.(-E))).(NW.SW).((N+(-NE)).(S+(-SE)))+(S.-(N+NE))
+
+where '.' is a logical AND operation, '+' is a logical OR operation and '-' is a 
+logical NOT operation.  The the 90o rotations of this can be generated, and 
+when logically ORed together give the following edge condition, which 
+determines whether a pixel is a non-skeletal edge pixel.
+
+edge = c.
+((W.(-E)).(((NW.SW).((N+(-NE)).(S+(-SE))))+(S.-(N+NE)))+
+ (N.(-S)).(((NW.NE).((E+(-SE)).(W+(-SW))))+(W.-(E+SE)))+
+ (E.(-W)).(((NE.SE).((S+(-SW)).(N+(-NW))))+(N.-(S+SW)))+
+ (S.(-N)).(((SW.SE).((W+(-NW)).(E+(-NE))))+(E.-(W+NW))))
+
+This is used to determine if a given pixel is an edge point of an image.  
+However,  just deleting edge points would soon lead to the complete 
+erosion of the image.  The edge function is used in conjunction with the 
+other  templates to determine some protection conditions for pixels which 
+should not be deleted.
+
+No protection conditions are required for template one, as it is not possible
+to remove W and c in the same iteration.
+
+For template two the following edge conditions are necessary;
+(a)	edge(c).N.S.edge(E)
+This protects W and c which should not be removed in the same iteration.
+Inadvertently this also protects the 180o rotation of this template.
+
+(b)	edge(c).edge(S).W.E
+This is used to protect the 90o and 270o rotations of template two, in a 
+similar fashion to (a).
+
+(c) 	edge(c).edge(E).edge(S).edge(SE)
+This condition protects the NW corner of an isolated 2x2 square.
+
+For template three the following edge conditions are necessary;
+(d)	edge(c).(-SW).S.W.(edge(S+edge(W))
+This condition protects against the complete removal of the central 
+horizontal or vertical lines, in the instance of template three where SW is 
+white, NW is black and W is an edge element.  Again, this also protect its 
+180o rotation.
+
+(e)	edge(c).(-SE).S.E.(edge(S+edge(E))
+This protects the 90o and 270o rotations of template three, in a similar 
+fashion to (d).
+
+All of these protection conditions can be logically ANDed to form one 
+overall protection condition, which is;
+
+c.(-edge(c)
++(edge(E).N.S)
++(edge(S).W.E)
++((-SE).S.E.(edge(S)+edge(E)))
++((-SW).W.S.(edge(W)+edge(S)))
++(edge(E).edge(S).edge(SE)))
+7.4 Discussion of the execution cycle
+
+The algorithm iteratively checks  each pixel in an image, and if the pixel is 
+an edge pixel and is not protected  (by the definitions in section 7.3) then 
+that pixel is removed (set to white).  When all the pixels have been tested 
+(and possibly removed) then the process is repeated, unless no pixels have 
+been removed, in which case the  thinning process is complete.
+
+7.5 Pseudo code
+
+This is the pseudo code as derived from the article.
+
+Stewart Thin Image
+	Repeat
+		For each row in the image
+			For each column in the image
+				If the current pixel is on the edge of the image
+					If the current pixel is not protected
+						Delete current pixel
+					End if
+				End if
+			Next Column
+		Next Row
+	Until the image not altered
+End Stewart Thin Image
+
+7.6 Implementation
+
+This is another algorithm which is simple to implement from the pseudo 
+code.   The edge function and protection conditions are simply collections 
+of boolean operations.  To make the code more readable, the following 
+steps have been taken.  Two preprocessor definitions each have been made 
+for C and its eight neighbours (N, E, etc.).  The first set make up a boolean 
+expression, which evaluates whether or not the pixel is black or not.  
+These are defined as the uppercase acronyms for the eight compass points 
+(N, E, etc.) and C for the current pixel.  The second set are the position in 
+the array relative to the current pixel (which is at 'i, j').  These are defined 
+using the lowercase acronyms of the eight compass points (n, e, etc.) and c 
+for the current pixel.  Some examples are listed below.
+
+For the current pixel
+#define C  (old_image[i][j] == BLACK)
+#define c   i, j
+
+For North of the current pixel
+#define N  (old_image[i][j-1] == BLACK)
+#define n   i, j-1
+
+For North-East of the current pixel
+#define NE (old_image[i+1][j-1] == BLACK)
+#define ne  i+1, j-1
+
+7.6.1 The S_Edge() function
+
+1	int S_Edge(int i, int j)
+2	{
+3	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+4	   
+5	   return (C && ((W && !E) && (((NW && SW) && 
+                 ((N || !NE) && (S || !SE))) || (S && !(N || NE))) ||
+6	                 (N && !S) && (((NW && NE) && 
+                 ((E || !SE) && (W || !SW))) || (W && !(E || SE))) ||
+7	                 (E && !W) && (((NE && SE) && 
+                 ((S || !SW) && (N || !NW))) || (N && !(S || SW))) ||
+8	                 (S && !N) && (((SW && SE) && 
+                 ((W || !NW) && (E || !NE))) || (E && !(W || NW)))  
+9	                )
+10	             )
+11	}
+
+This function determines whether a function is an non-skeletal edge pixel.  
+As can be seen it just consists of a return statement which evaluates 
+whether a pixel is or is not a non-skeletal edge.  This is where the first set 
+of preprocessor definitions are used.
+
+7.6.2 The S_Protected() function
+
+1	int S_Protected(int i, int j)
+2	{
+3	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+4   
+5	   return (!S_Edge(c)
+6	        || (S_Edge(e) && N && S)
+7	        || (S_Edge(s) && W && E)
+8	        || (!SE && S && E && (S_Edge(s) || S_Edge(e)))
+9	        || (!SW && W && S && (S_Edge(w) || S_Edge(s)))
+10	        || (S_Edge(e) && S_Edge(s) && S_Edge(se)));
+11	}
+Like S_Edge() this function consists of just a return statement.  The 
+expression returned evaluates to whether or not the current pixel is a 
+protected pixel, as defined by the five protection conditions (see section 
+7.4).  This function also uses the first set of preprocessor definitions.  It 
+also make use of the second set, which are used in calls to the S_Edge() 
+function, utilising edge information of some of it neighbours.
+
+7.7 Initial testing
+
+As usual, after completion the algorithm was tested on the H character 
+and the cell-like structure.  Figures 7.2 and 7.3 show the respective 
+results.
+
+7.8 Initial conclusions
+
+As suggested in chapter 6, the modifications to Wu and Tsai[12] presented  
+here by Stewart do seem to overcome the excessive erosion caused by the 
+algorithm, and so this algorithm seems perfectly suited for our purposes.

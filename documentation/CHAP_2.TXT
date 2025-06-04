@@ -1,0 +1,71 @@
+2 Investigations
+
+2.1 Converting the Supplied Algorithms
+
+In their supplied form the given algorithms are defined at several different 
+levels.  One may be just a simple, plain English definition, another may 
+use program flowcharts and another may be a full pseudo code solution.  
+With this in mind, a lot of work had to be done to get each algorithm into a 
+form that was ready to be implemented.  Each one was studied, and a 
+detailed pseudo code solution was then written.  This was then coded and 
+tested using a few benchmark images, with more thorough testing carried 
+out after all the algorithms were implemented.  By translating the 
+algorithm into the pseudo code inconsistencies and ambiguities become 
+more easy to spot, as important features of an algorithm would often be 
+'hidden'  beneath layers of English, or passed off as trivialities that the 
+author thought was obvious!
+
+2.2 Choosing an Image Storage Format
+
+With this project being a graphics related problem, the question of 
+whether to use stored image data or whether to use images created by 
+mathematical formulae/functions arises.  Considering special attention is 
+to be placed on cell type images, which are in nature quite irregular, the 
+idea of using stored image data immediately appeals as a solution, as the 
+functions required to produce such data would be relatively complex.  Also, 
+as the images need to output in some form (to be used in the other related 
+project) it would seem natural  to input and output the images in the same 
+format.
+
+This now brings up the question of which format to use to store the images 
+in.  With an abundance of graphics formats to chose from it seams 
+appropriate to use a format which lends itself to the form in which the 
+data is needed.  To do this we must first look at  what is required of the 
+data.  The only stipulation given  was
+
+·	The image data must consist of the value '0' with any background 
+	data being given the value '1' .
+
+This does differ from the norm of having '0' as the background data and 
+non-zero values as image data, but in itself does not create any problems 
+when defining a storage format,  but simplifies the choice as a 
+monochromatic format is needed, as only two colours are used.  To make 
+the loading/saving procedure as simple as possible to implement, a format 
+should be chosen that allows data to be stored without any data 
+compression.
+
+One image format which allows all of this is the SUN Rasterfile format[7].  
+A SUN Rasterfile consists of a file header containing information about 
+the image (width, height, colour map type etc.) of thirty two bytes, followed 
+by the (optional) colour map, which is then followed by the image data.  
+This format allows the image data to be stored in several colour depths, 
+including one bit per pixel, which allows monochromatic images to be 
+stored with each bit representing a matrix element (with the colour map 
+being omitted) so each bit is used as a direct colour  representation.
+
+2.3 Why Chose ANSI 'C'
+
+The ANSI standard 'C'[5] was chosen as the language to implement the 
+project for the following reasons:
+
+·	By restricting the program to the ANSI standard implies greater 
+	code portability (allowing development at the University and at 
+	home, if need be.)
+·	'C'  is a modular programming language, which is easily extendable.
+·	As only a simple (command line) interface is required, so more 
+	complicated visual programming languages can be avoided.
+·	If need be a GUI (Graphical User Interface) front end can be 
+	written to drive the command line program.
+·	The SUN Rasterfile format is easy to implement in 'C' using the 
+	'rasterfile.h' include file.
+

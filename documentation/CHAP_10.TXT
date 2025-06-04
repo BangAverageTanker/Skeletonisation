@@ -1,0 +1,168 @@
+10 Testing the algorithms
+
+10.1 Images used in the testing the algorithms
+
+The images shown in Figure 10.1 have been used to check the algorithms 
+respective abilities, both speed wise and in their relative thinning 
+capabilities.
+
+
+
+
+
+
+
+
+
+
+
+(a) is a typical alphabetical character.  These are used in many of the tests 
+in  the original papers. "S.ras".
+
+(b) is a simple cell-like structure.  This is used to test the abilities of the 
+algorithms at processing these types of image (as that particular area is of 
+particular interest).  "Cell.ras".
+
+(c) is a more complex version of (b).  "Complex_Cell.ras"
+
+10.2 Suen and Zhangs algorithm
+
+Figure 10.2 Shows the results obtained by Suen and Zhangs original 
+
+
+
+
+
+
+
+
+algorithm.  These results are generally good, and any of the erosion 
+problems caused by the algorithm have little (if any) effect on the results.  
+One bad point that can be seen from the resulting skeletons is the amount 
+of 'staircasing' present, resulting in a non-unary thickness of strokes. 
+
+10.3 Lu and Wangs algorithm
+
+Figure 10.3 shows the results obtained from Lu and Wangs modifications 
+to  Suen and Zhangs algorithm.
+
+
+
+
+
+
+
+
+
+Again the results are generally good, but the modifications to avoid the 
+deletion of diagonal lines has increased the amount of 'staircasing', 
+resulting in improper eight connected skeletons.
+
+10.4 Wu and Tsais algorithm
+
+Figure 10.4 Shows the results obtained by Wu and Tsais algorithm.
+
+
+
+
+
+
+
+
+
+These results are not very good at all, with excessive erosion of vertical 
+lines, resulting an extremely eroded skeleton.
+
+
+10.5 Stewarts Algorithm
+
+Figure 10.5 shows the results from Stewart algorithm.
+
+
+
+
+
+
+
+
+
+These are very good, with less 'staircasing' then any of the previous 
+algorithms, and properly formed skeletons.
+
+10.6 Holt et al.s' algorithm
+
+Figure 10.6 shows the results obtained from the algorithm by Holt et al..
+
+
+
+
+
+
+
+
+
+These are also good results, with properly formed skeletons, and no 
+erosion.  They do, however, have a similar level of 'staircasing' to Suen and 
+Zhangs algorithm resulting in non-unary thickness strokes again.
+
+10.7 Timings
+
+Another factor to look for in a good thinning algorithm is its speed.  Each 
+of the supplied algorithms was timed to see how long and how many 
+iterations it took to thin the three test images.  The algorithms were due 
+to be timed on both the Universities SUN Sparc 1+ machines and an 
+Amiga 1200, to show the portability of the generated code.  However, the 
+timing facilities available on the SUN Sparc machines (/usr/bin/time) were 
+only accurate to a second, and the test images were processed to quickly to 
+give any accurate results.  One way to have obtained better results would 
+have been to have used larger images, but the nature of the UNIX 
+accounts disk quota system combined with the sheer size of the UNIX 
+executables created by the C compiler would have made this extremely 
+difficult.  Therefore, the timings obtained have been done on an Amiga 
+1200 home computer.  This is running Amiga OS 3.0, and has a 50 Mhz 
+Motorola 68030 cpu, with 6 megabytes of main memory and 12 megabytes 
+of virtual memory.  The Executive Timer V1.10 was used to gain the 
+relevant times, and the times in the table below are the actual cpu times 
+(i.e. only the time when the thinning process was using the cpu), and not 
+user times.  These times are accurate to 100th of a second, with each given 
+time being an average of five runs.
+NOTE:
+	Secs. is the cpu time in seconds.
+	Its. is the number of iterations taken.  For Suen and Zhang and Lu 
+	and Wang this also shows the total number of sub-iterations in 
+	brackets. 
+
+	Image		S.ras		Cell.ras	Complex_Cell.ras
+ Algorithm		Secs.	Its.	Secs.	Its.	Secs.	Its.
+
+ Suen and Zhang	14.01	7 (13)	6.17	3 (6)	14.52	7 (13)
+
+ Lu and Wang	12.69	6 (12)	6.14	3 (6)	14.14	7 (13)
+
+ Wu and Tsai	5.10	10	1.66	6	5.93	10
+
+ Stewart		3.26	10	1.64	6	3.53	10
+
+ Holt et al.		4.10	10	1.66	6	4.55	10
+
+As can be seen from these times, the newer algorithms a generally faster, 
+then the older ones.  This can be put down to two main reasons.
+
+(1)	The Suen and Zhang algorithm (and derivatives) which are 
+two-pass algorithms rely on a lot of matrix subtraction between iterations, 
+which in the form used in the C programs is very time consuming.
+(2)	The code for the Stewart algorithm is much more optimised, and 
+uses fewer function calls, using logical comparisons instead.  The use of 
+more function calls in the earlier programs means that more work has to 
+be done creating and destroying local stacks and other data areas (this 
+shouldn't really have too much of an effect as the large arrays are declared 
+globally).
+
+10.8 Test results
+
+The skeletal results and the timings show that Stewarts algorithm seems 
+to be the best of the implemented algorithms at thinning images.  Only 
+one actually fails to do what the author claims, Wu and Tsais' algorithm, 
+with the other three performing well enough.  Stewart[10] was chosen as the 
+best because of the quality of the generated skeletons, and the overall 
+speed of the executable.

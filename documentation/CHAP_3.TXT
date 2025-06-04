@@ -1,0 +1,271 @@
+3 Image Loading
+
+3.1 Rasterfile format
+
+The images used to test the algorithms are stored in the Sun 
+Microsystems Rasterfile format.  The file format begins with the file 
+header shown in Table 3.1.
+
+Table 3.1  Sun Rasterfile header
+
+Offset	Name		Description
+ 0		magic		magic number 59a66a95h(RAS_MAGIC)
+ 1		width		image width  in pixels
+ 8		height		image height in pixels
+12		depth		bits per pixel
+16		length		size of image data in bytes, or zero
+20		type		encoding type
+24		maptype	type of colourmap
+28		maplength	length of colourmap
+
+This is followed by the colour map (if any) of maplength bytes, which is in 
+turn followed by the image data.  The size of the image will be length 
+bytes, unless length is zero, in which case it will have to be calculated from 
+the width, height and depth fields, using the formula:
+
+	length = (width * height) / (8 / depth).
+
+The type field allows for several variations of file encoding types (including  
+run length encoding and embedded TIFF and IFF files.)  However, to avoid 
+the complexity of decoding such Rasterfiles, only those with the code 
+RT_STANDARD (one) will be able to be decoded by our program.   For 
+RT_STANDARD encoded files the image data is stored left to right within 
+a row, and row by row  from top to bottom.  Each row is also padded out to 
+a multiple of 16 bits.
+
+As we are only using one bit deep images, then each individual bit is a 
+pixel, with the leftmost bit being the high bit in the byte.
+
+For monochromatic images the maptype field may be one of two values, 
+RMT_NONE (zero) for no colour map, or RMT_EQUAL (one) with 8 bits 
+per colour in a single map.  Monochrome images do not need a colour map 
+and so should have a maptype of RMT_NONE (and hence a maplength of 
+zero), but some of the packages used to create the test images actually 
+create them with an RMT_EQUAL maptype, so these can also be loaded 
+but the colour map data is ignored.
+
+3.2 rasterfile.h 
+
+When using ANSI C the Rasterfile header can be easily represented as a C 
+struct datatype, as shown in Table 3.2.
+
+Table 3.2 struct rasterfile 
+
+struct rasterfile {
+	int	ras_magic ;
+	int	ras_width ;
+	int 	ras_height ;
+	int 	ras_depth ;
+	int 	ras_length ;
+	int 	ras_type ;
+	int	ras_maptype ;
+	int	ras_maplength ;
+}
+
+The various types of rasterfile or maptype (e.g. RT_STANDARD) are also 
+defined in rasterfile.h as preprocessor directives, whose use makes the 
+code easier to understand (i.e. by providing a brief text description rather 
+that a numeric value.)
+
+3.3 Design for a Rasterfile loader
+
+The basis for the rasterfile loader follows the following plan;
+
+Load the rasterfile header.
+Determine  if the rasterfile is of a supported type.
+If it is supported load the image data into an array.
+The difficult part of this procedure is loading the image into an array.  In 
+the final solution we decide that this array would be a two dimensional 
+array if integers (ints) ,with each pixel being represented by an array 
+element.  Each element is a byte (8 bits) in size.  In C the minimum value 
+which can be read in from a file is a byte, and as a pixel in the image data 
+is only one bit then pixels will have to be converted eight at a time.  
+Rather then reading each byte from the rasterfile one at a time we decided 
+to load all the image data into memory at once and then scan through the 
+image data one byte at a time.
+
+The pseudo code for such a decoder is:
+
+read rasterfile header
+if it is a rasterfile
+	read colourmap (if any)
+	read image data
+	for each pixel in a row
+		get the first byte for that row
+		for each pixel in a column
+			bit = 1
+			array (column, row) = bit value(bit, byte)
+			increment bit
+			if the bit greater then 8
+				bit = 1
+				get next byte
+			endif
+		next column
+	next row
+endif
+
+3.4 The Get_Bit() function
+
+ANSI C does not have any functions for directly manipulating bit values of 
+a number, so the first problem to overcome is to design a function which 
+will get the value (zero or one) of any given bit from a given number (-128 
+to 127).  One Important thing to remember is the order in which the bits 
+are stored, which is that the highest value bit is the left most within the 
+byte, as in Figure 3.1.
+   Figure 3.1  Bit ordering in a byte 
+
+   byte		<  byte 1   > <   byte 2  > <  byte 3   > ...
+   bit		7 6 5 4 3 2 1 7 6 5 4 3 2 1 7 6 5 4 3 2 1 ...
+   value	0 1 1 1 1 1 1 0 0 0 1 1 0 1 1 1 1 0 0 0 1 ...
+ 	
+The following C function will get the value of a given bit (the line numbers 
+are for information purposes only) :
+
+1	int Get_Bit(int bit, signed char data)
+2	/******
+3	 *
+4	 * Get the value of a given bit in a given byte.
+5	 *
+6	 ******/
+7	{
+8	   signed char mask ;
+9	   int value ;
+10
+11	   mask = 1 << (8-bit) ;
+12	   value = (mask & data) >> (8-bit) ;
+13	   return (abs(value)) ;
+14	}
+
+Line 11 creates a mask of the bit pattern.  When this is bitwise ANDed 
+(the & symbol) with the current byte (data) on line 12 this gives a value of 
+2bit, which is then right shifted back again to give a value of 0 or 1.
+
+e.g. For 6th bit in the values 125 and 121 
+For the 6th bit a mask value of 2(8-6) = 4 is created (00000100 in binary).
+value			          125	           121 
+bit			76543210	76543210
+mask			00000100	00000100
+byte			01111101	01111001
+mask & byte		00000100	00000000
+right shifted 2	00000001	00000000
+
+As can be seen 125 has the 6th bit set and so the value one is generated, 
+but 121 does not have the 6th bit set so zero is generated.
+
+3.5 Using Get_Bit()
+
+The following section of code shows how the image date, once loaded into 
+memory, is decoded into an array (called old_image):
+
+1	width = header.ras_width ;
+2	height = header.ras_height ;
+3	if (IMAGESIZE == 0)
+4	{
+5	   header.ras_length = (width * height) / 8 ;
+6	}
+7	if ((base_memory = (signed char *) malloc(IMAGESIZE)) != NULL)
+8	{
+9	    if (fread(base_memory, IMAGESIZE, 1, file_handle) == 1)
+10	    {
+11	       memory_location = base_memory ;
+12	       for (y = 1; y <= height; y++)
+13	       {
+14	          for (x = 1; x <= width; x++)
+15	          {
+16	             old_image[x][y] = Get_Bit(bit, *memory_location) ;
+17	             bit = bit + 1 ;
+18	             if (bit > 8)
+19	             {
+20	                bit = 1 ;
+21	                memory_location = memory_location + 1 ;
+22	             }
+23	          }
+24	       }
+25	    }
+26	    else
+27         {
+28	      error = RIO_IMAGE_CORRUPT ;
+29	   }
+30	   free(base_memory) ;
+31	}
+
+Line 3 checks to see if the IMAGESIZE (a C #define to replace 
+header.ras_length) is set to zero, as in older Rasterfiles.  If it is zero then 
+the actual size is calculated in line 5.  Line 7 then attempts to allocate a 
+block of memory to load the image data into.  If it succeeds it goes on to 
+read the image data into this block.  In line 11 a running pointer 
+(memory_location) is assigned to the start of the image data in memory 
+(base_memory.)  The Image data is the processed, row by column, with y 
+and x representing them respectively.  After each call to Get_Bit() (line 16) 
+the value for bit (which is initialised to one) is incremented (line 17.)  
+When the variable bit equals nine it is reset to equal one (line 20) and the 
+memory location is incremented (line 21.)
+
+3.6 Design for a Rasterfile saver
+
+The Design for a Rasterfile saving routine is very similar to the loading 
+process, except that the values are written, not read.  Here is  the basic 
+plan;
+
+Generate the Rasterfile header.
+Save the data from the array as image data.
+
+This is in fact simpler than a loader, as a loader often has to be able to 
+cope with various different versions of a file, and be able to check for 
+corrupt files, etc.  The saver can simply define which version of a file it is 
+to save the image as, and write it to disk.  A more detailed pseudo code 
+solution is:
+
+use loaded Rasterfile header
+set colour map to RMT_NONE
+set maplength to zero
+for each row in the array
+	get the first byte for that row
+	for each column  in the array 
+		bit = 1
+		set bit (bit) of byte = array(column, row) 
+		increment bit
+		if bit greater than 8
+			bit = 1
+			get next byte
+		endif
+	next column
+next row
+
+3.7 The Set_Bit() function
+
+The Set_Bit() function is used to set the actual bits of each byte in the 
+target image data.  The following code shows how this is done:
+
+1	signed char Set_Bit(int bit, signed char data, int value)
+2	/******
+3	 *
+4	 * Set a given bit to a given value
+5	 *
+6	 *****/
+7	{
+8	   if (bit == 1)
+9	   {
+10	      data = (value << (8-bit)) ;
+11	   }
+12	   else
+13	   {
+14	      data = data | (value << (8-bit))  ;
+15	   }
+16	   return (data) ;
+17	}
+
+The check on line 8 is used to determine if it is the first bit to be set within 
+that byte.  If that is the case then the image data byte (data) is just set to 
+the value from the array (value) left shifted (eight minus bit) times.  This 
+will give the byte a value of either 0 or -128.  If it is not the first bit to be 
+set then data  is set to its current value bitwise ORed (the | symbol) with 
+the value from the array left shifted (eight minus bit) times.  This has a 
+cumulative effect, so that after all the bits have been set data will contain 
+a value between -128 and 127.
+
+3.8 Using Set_Bit()
+
+Set_Bit() is used in a similar fashion to Get_Bit().  Full details of the code 
+for the Rasterfile saving routine can be found in Appendix B.
+

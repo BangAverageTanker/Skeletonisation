@@ -1,0 +1,320 @@
+6 Wu and Tsai's algorithm
+
+6.1 Background
+
+This algorithm was proposed in October 1992.  It claims to produce 
+perfectly 8-connected skeletons, which are noise insensative and do not 
+produce excessive erosion.  It differs from the previous two algorithms, 
+Suen[11] and Lu[8], by being a one-pass algorithm.  It also differs in its pixel 
+deletion criteria.  Instead of having the six conditions of Suen[11] and Lu[8] 
+it uses fourteen templates to determine if a pixel should be deleted.
+
+6.2 Thinning templates
+
+Here are the templates used :
+
+(a) 	1 1 y	(b)	1 1 1	(c)	y 1 1 x	(d)	y 0 y
+	1 c 0		1 c 1 		0 c 1 1		1 c 1
+	1 1 y		y 0 y		y 1 1 y		1 1 1
+										x 1 x
+
+(e) 	x 0 0	(f)	x 1 1	(g)	0 1 0	(h)	x 1 x
+	1 c 0		0 c 1		0 c 1 		1 c 0
+	x 1 x 		0 0 x		0 0 0 		x 0 0
+
+(i)	0 0 x	(j)	0 0 0
+	0 c 1 		0 c 1
+	x 1 1		0 1 0
+
+(k)	0 0 0	(l)	1 0 0	 (m)	1 1 1	(n)	0 0 1
+	0 c 0		1 c 0		0 c 0		0 c 1
+	1 1 1		1 0 0		0 0 0		0 0 1
+
+where c is the currently tested pixel, 0 is a white pixel (background data), 
+1 is a black pixel (image data) and x is a pixel that is either black or white.  
+The y pixels within a given template are sets of values where at least one 
+of the pixels is a white pixel.  
+
+Templates (a) - (d) are used to remove the edge points of horizontal and 
+vertical lines.  Templates (e) - (j) are used to remove the edge points of 
+diagonal lines in both directions.  Templates (k) - (n) are used to eliminate 
+noise along the edge of a straight line.  
+
+A pixel should be removed if any of the above templates match it's 
+neighbouring pixels.
+
+6.3 Supplied algorithm
+
+Here is the algorithm as described by the authors:
+
+Input.  A binary image f0.
+Output.  The image of the thinning result.
+Step 1.  i := 0
+Step 2.  i := i + 1
+Step 3.  Check each pixel of fi.  If it is a black pixel and its neighbours 
+match any of the templates (a) - (n), then change it to white pixel and set 
+flag := true.
+Step 4.  If flag = false, which means the image thinned, then go to Step 5 
+with fi as the thinning result.  Otherwise, go to Step 2 to perform the next 
+iteration.
+Step 5.  Output the thinning result.
+
+NOTE: fi is the the image to be processed at the i-th iteration.
+
+6.4 Explanation of the execution cycle
+
+This algorithm  has a similar execution cycle to Suen[11].  The major 
+diferences are the fact that it is only a single pass algorithm.  It also does 
+not use the matrix subtraction method as in Suen[11] but instead modifies a 
+copy of the last iterations image.  The algorithm iteratively checks each 
+pixel in the image and compares the pixels neighbours (from the previous 
+iteration) with the thinning templates.  If any of the templates match then 
+the pixel (in the current iterations image) is set to white (zero), and a 
+boolean flag indicating the image has been altered is set to true.  After 
+checking all of the pixels the algorithm checks the boolean flag, and if it 
+set to true (i.e the image has been altered) the algorithm begins another 
+iteration, with the altered image now the previous iterations image.  If the 
+flag is false the image has not been altered and the thinning process is 
+completed so the image is output.
+
+6.5 Pseudo code
+
+This is the pseudo code derived from the authors algorithm.
+
+Wu Tsai Thin Image
+	Repeat
+		For each row in the image
+			For each column in the image
+				If template A matches or
+				If template B matches or
+				If template C matches or
+				If template D matches or
+				If template E matches or
+				If template F matches or
+				If template G matches or
+				If template H matches or
+				If template I matches or
+				If template J matches or
+				If template K matches or
+				If template L matches or
+				If template M matches or
+				If template N matches
+					Delete current pixel
+				End if
+			Next Column
+		Next Row
+	Until the image not altered
+End Wu Tsai Thin Image
+
+6.6 Implementation
+
+Again, the implementaion of this algorithm from the pseudo code is 
+straight forward.  Each of the templates was coded as a boolean function 
+which evaluated whether the template matched the neigbours of the pixel.  
+The two arrays old_image and image were used, but this time with 
+old_image 
+representing the 
+previous iterations 
+picture and image 
+being the current 
+iterations picture.  
+One problem to 
+overcome involved 
+templates c and d.  
+The other 
+templates only use 
+a 3 x 3 template, so the measures detailed in Chapter 4 to avoid array out 
+of bounds errors will also prevent these templates from attempting illegal 
+array accesses.  Templates c and d, however, use a  3x4 and a 4x3 
+template respectively, which would cause an array out of bounds error 
+when the current pixel was on the right-most column or bottom row of the 
+image (see Figure 6.1).
+
+To prevent this from happening extra code is used in the functions for 
+templates c and d.  The points P1 to P9 are defined as in Chapter 4.  Then 
+two extra points are defined thus;
+
+/*
+ 1 extra for Template d
+*/
+#define P10 old_image[i][j+2]
+/*
+ 1 extra for template c 
+*/
+#define P11 old_image[i+2][j]
+
+Only two extra points are needed, and not six (three for each template) as 
+might be expected, because two of the extra points in templates c and d 
+are don't care conditions (i.e. x, where these pixels can be either black or 
+white) so they don't need to be tested.
+
+In the functions for templates c (see section 6.7.3) and d (see section 6.7.4) 
+a check is preformed at the start of each to see if the currently tested pixel 
+is in the last column or row respectively.  If it is, a value of zero (white) is 
+substituted for the point that would be outside the array, and hence the 
+templates will not match, as both of the templates require a value of one 
+(black) to be present for a match.
+
+6.7 Some examples of the C code
+
+Here are three examples of the C code used, followed by an explanation of 
+what each subroutine does.  The rest of the code for the Lu and Wang 
+algorithm can be found in Appendix A, under the file WuTsai.c.
+
+6.7.1 The Wu_Tsai() function
+
+1	void Wu_Tsai()
+2	{
+3	   int i, j ;
+4	   int count = 0 ;
+5	   extern int width, height; 
+6	   extern int altered ;
+7
+8	   Invert() ;
+9	   Old_Image_2_Image() ;
+10	   do
+11	   {
+12	      altered = FALSE ;
+13	      count = count + 1 ;
+14	      printf("Iteration %d \n", count) ;
+15	      for (j = 1; j <= height; j++)
+16	      {
+17	         for (i = 1; i <= width; i++)
+18	         {
+19	            WT_Remove_Point(i, j) ;
+20	         }
+21	      }
+22	      Image_2_Old_Image() ;
+23	      All() ;
+24	   } while (altered == TRUE) ;
+25	   printf("\nThinning completed\n") ;
+26	   Invert() ;
+27	   return ;
+28	}
+
+Line 9 copies the picture (as loaded into the array old_image) into the 
+array image, the current iterations picture.  The 'do-while' loop (lines 10 to 
+24) is used to repeat the thinning process until the image has not been 
+altered in the current iteration.  At the start of an iteration, the altered 
+flag is set to false (line 12) and the iteration count is incremented (line 13).  
+The two 'for' loops are used to iteratively process the image row by row 
+(lines 15 to 21) and column by column (lines 17 to 20).  Line 19 is a call to 
+the function WT_Remove_Point() which is used to determine if a point 
+should be deleted.
+6.7.2 The WT_Remove_Point() function
+
+1	void WT_Remove_Point(int i, int    j)
+2	{
+3	   ex___tern int altered ;
+4	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+5	   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+6	
+7	   if (P1 == BLACK)
+8	   {
+9	      if ((WT_Template_A(i, j) == TRUE) ||
+10	          (WT_Template_B(i, j) == TRUE) ||
+11	          (WT_Template_C(i, j) == TRUE) ||
+12	          (WT_Template_D(i, j) == TRUE) ||
+13	          (WT_Template_E(i, j) == TRUE) ||
+14	          (WT_Template_F(i, j) == TRUE) ||
+15	          (WT_Template_G(i, j) == TRUE) ||
+16	          (WT_Template_H(i, j) == TRUE) ||
+17	          (WT_Template_I(i, j) == TRUE) ||
+18	          (WT_Template_J(i, j) == TRUE) ||
+19	          (WT_Template_K(i, j) == TRUE) ||
+20	          (WT_Template_L(i, j) == TRUE) ||
+21	          (WT_Template_M(i, j) == TRUE) ||
+22	          (WT_Template_N(i, j) == TRUE)   )
+23	      {
+24	         altered = TRUE ;
+25	         image[i][j]  = WHITE ;
+26	      }
+27	   }
+28	   return ;
+29	}
+
+This function determines whether a point is deleted or not.  The two 
+arguments are the coordinates (i is the column and j is the row) of the 
+pixel.  Line 7 checks to see if the pixel is part of the actual image data and 
+not the background (i.e. If the pixel is black or white.)  If it is, then lines 9 
+to 22 are part of a boolean expression which checks too see if any of the 
+templates match the pixel and its neighbours.  If this expresion evaluates 
+to true (i.e. one or more of the templates match) then the pixel at i, j is set 
+to white (zero) and the boolean flag (altered) is set to true, on lines 24 and 
+25 respectively.
+
+
+6.7.3 The WT_Template_C() function
+
+1	int WT_Template_C(int i, int j)
+2	{
+3	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+4	   extern int width ;
+5	   int p11 ;
+6	
+7	   if (i > width)
+8	   {
+9	      p11 = WHITE ;
+10	   }
+11	   else
+12	   {
+13	      p11 = P11 ;
+14	   }
+15
+16	   return (((P7 == WHITE) || (P9 == WHITE)) && (P8 == WHITE) && 
+17	            (P2 == BLACK) && (P3 == BLACK) && (P4 == BLACK) &&
+18	            (P5 == BLACK) && (P6 == BLACK) && (p11 = BLACK)) ;
+19	}
+
+This function represents template c as called by the WT_Remove_Point() 
+function.  It includes the code to avoid illegal memory accesses.  This is 
+coded as follows.  A local variable p11 (note the lowercase p) is created on 
+line 5.  A check is the performed on line 7 to see if the pixel is in the last 
+column.  If the pixel is in the last column (line 9) the variable is assigned 
+the value WHITE (zero.)  If the pixel is not in the last column (so there is 
+no danger of illegal memory accesses - line 13) then the variable is 
+assigned the value of P11 (notice the uppercase P) which is a preprocessor 
+definition which evaluates as old_image[i+2][j].  p11 is then used in place 
+of P11 in the expression in lines 16 to 18.  This is a boolean expression 
+which evaluates whether the template matches to the currently tested 
+pixel and its neighbours.  This boolean value is the value returned by the 
+function to WT_Remove_Point().
+6.7.4 The WT_Template_D() function
+
+1	int WT_Template_D(int i, int j)
+2	{
+3	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+4	   extern int height ;
+5	   int p10 ;
+6	
+7	   if (j > height )
+8	   {
+9	      p10 = WHITE ;
+10	   }
+11	   else
+12	   {
+13	      p10 = P10 ;
+14	   }
+15	
+16	   return (((P9 == WHITE) || (P3 == WHITE)) && (P2 == WHITE) &&
+17	            (P4 == BLACK) && (P5 == BLACK) && (P6 == BLACK) &&
+18	            (P7 == BLACK) && (P8 == BLACK) && (p10 == BLACK)) ;
+19	}
+
+This represents the template d as called by the WT_Remove_Point() 
+function.  It follows the same ideas to avoid illegal memory accesses as 
+WT_Template_C().
+
+6.8 Initial testing
+
+To test the algorithm after completion it was tested on the same two 
+images as in Chapter 4, the H character and the cell-like structure.  The 
+grey pixels in the figures 6.2 and 6.3 show the original image for 
+comparison.
+6.9 Initial conclusions
+
+This algorithm seems to produce excessively eroded skeletons, particularly 
+on any vertical line segments.  With this in mind it seems unlikely that 
+this algorithm can be used for our purposes.  However, Chapter 7 
+describes some modifications to this algorithm which may improve the 
+quality of the skeletons.

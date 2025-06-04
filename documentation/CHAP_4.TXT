@@ -1,0 +1,406 @@
+4 Suen and Zhang's Algorithm
+
+4.1 Background
+
+This algorithm was suggested in 1984 by T Y Zhang and C Y Suen.  This is 
+a parallel algorithm which consists of two subiterations, the first deletes 
+south-east boundary points and north-west corner points, the second 
+deletes the north-west boundary points and south-east corner points.  The 
+skeleton created should be of unitary thickness, with the end points and 
+pixel connectivity preserved.  
+
+The image data is described as a matrix IT, with each pixel in the image 
+IT(i, j), can be set to either zero or one.  The patterns within the image 
+consists of the pixels 
+with a value one, with 
+the lines in these 
+patterns being one or 
+more pixels thick.  For 
+every iteration  a set 
+of tests are performed 
+on each pixel in the 
+image, with the 
+results depending on 
+the eight surrounding the pixel, labelled P2, P1, ..., P9 with P1 being the 
+pixel being processed (See Figure 4.1.)  
+
+As this is a parallel algorithm, the value given to a pixel in the nth 
+iteration depends on the previous (n-1)th, so that all points in the image 
+can be processed simultaneously.
+
+4.2 Removal criteria
+
+Within each iteration there are two sub-iterations and the removal criteria 
+for each of these is slightly different.  
+
+In the first sub-iteration a contour point will be removed (set to zero) if it 
+satisfies the following conditions:
+
+	(a)	2 < B(P1) < 6
+	(b)	A(P1) = 1
+	(c)	P2 * P4 * P6 = 0
+	(d)	P4 * P6 * P8 = 0
+
+where A(P1) is the number of 
+01 patterns in the ordered 
+set of P2, P3, P4, .., P9, and 
+B(P1) is the number nonzero 
+neighbours of P1.
+
+In the second sub-iteration 
+the conditions c and d are 
+replaced with:
+
+	(c')	P2 * P4 * P8 = 0
+	(d')	P2 * P6 * P8 = 0
+
+and the conditions a and b 
+remain the same.
+
+A flowchart of the algorithm 
+as supplied by the authors is 
+shown in Figure 4.2.
+
+4.3 Errors present and other ambiguities  
+
+After studying the flowchart supplied it becomes obvious that it is in fact 
+incorrect (This is also pointed out by Lu & Wang - Chapter 5.)  The arrow 
+at the bottom which loops back to the first Search M (Satisfied... box 
+should actually go to the C = 0 box above it.  The effect of this on the 
+algorithm is not that drastic, as it would only cause a second sub-iteration 
+to be completed after a first, even if no pixels were removed, as the count 
+value C would not have been set to zero.
+
+One point which the original text does not make particularly clear is that 
+the  removal criteria tests should only be carried out on boundary pixels 
+(i.e. pixels along the edge of the pattern.)  This was completely overlooked 
+in the development of the original pseudo code and program, and hence 
+the created skeletons were completely eroded.
+
+4.4 Pseudo code
+
+The pseudo code for this algorithm can be split into several different 
+sections.
+
+4.4.1 The thinning routine
+
+Suen Zhang Thin Image
+	Repeat
+		Sub-Iteration one 
+		If image is altered
+			Sub-Iteration two
+		End if
+	Until image is not altered
+End Suen Zhang Thin Image
+
+4.4.2 Sub-iteration one 
+
+Sub-iteration one
+	For row in the image
+		For each column in the image
+			if current pixel is a boundary pixel
+				If condition a is true
+					If condition b is true
+						If condition c is true
+							If condition d is true
+								Delete current pixel
+							End if
+						End if
+					End if
+				End if
+			End if
+		Next row
+	Next column
+End Sub-iteration one
+4.4.3 Sub-iteration two 
+
+Sub-iteration two
+	For row in the image
+		For each column in the image
+			if current pixel is a boundary pixel
+				If condition a is true
+					If condition b is true
+						If condition c' is true
+							If condition d' is true
+								Delete current pixel
+							End if
+						End if
+					End if
+				End if
+			End if
+		Next row
+	Next column
+End Sub-iteration two
+
+4.4.4 Condition a
+
+Condition a
+	If   2 < (P2+P3+P4+P5+P6+P7+P8+P9) < 6
+		Condition a is true
+	Else
+		Condition a is false
+	End if
+End Condition a
+
+
+4.4.5 Condition b
+
+Condition b
+	If the number of zero - one pairs in (P2, P3, .. , P9) equals one
+		Condition b is true
+	Else
+		Condition b is false
+	Endif
+End Condition b
+
+4.4.6 Condition c
+
+Condition c
+	If  P2 * P4 * P6 equals zero
+		Condition c is true
+	Else
+		Condition c is false
+	Endif 
+End Condition c
+
+4.4.7 Condition d
+
+Condition d
+	If  P4 * P6 * P8 equals zero
+		Condition d is true
+	Else
+		Condition d is false
+	Endif 
+End Condition d
+
+
+4.4.8 Condition c'
+
+Condition c'
+	If  P2 * P4 * P8 equals zero
+		Condition c' is true
+	Else
+		Condition c' is false
+	Endif 
+End Condition c'
+
+4.4.9 Condition d'
+
+Condition d'
+	If  P2 * P6 * P8 equals zero
+		Condition d' is true
+	Else
+		Condition d' is false
+	End if 
+End Condition d'
+
+4.4.10 Number of zero - one pairs
+
+Number of zero - one pairs
+	Number of zero - one pairs equals zero
+	If P2 equals zero and P3 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P3 equals zero and P4 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P4 equals zero and P5 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P5 equals zero and P6 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P6 equals zero and P7 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P7 equals zero and P8 equals one 
+		Increment number of zero - one pairs
+	End if
+	If P8 equals zero and P9 equals one 
+		Increment number of zero - one pairs
+	End if
+End Number of zero - one pairs
+
+4.5 Explanation of the execution cycle
+
+At the start of the algorithm the counter  (which is used as a boolean flag 
+to see if the image has been modified during the last iteration) is 
+initialised to zero (false).  The first sub-iteration iteratively checks all the 
+pixels in the matrix IT to see which are to be removed.  Any which are to 
+be removed are set to one in the matrix M (the same width and height as 
+IT.)  After the first sub-iteration the matrix M is then subtracted from 
+matrix IT (the result of which forms the matrix IT for the next 
+sub-iteration, or the final skeleton if no deletions occurred.)  If no deletions 
+occurred then the algorithm ends, with IT as the images skeleton. 
+
+If any points were deleted (c set to one) then c is set to zero and the matrix 
+IT is processed by the second sub-iteration.  Again, if any points are 
+removed then c is set to one and the pixel in matrix M (which had been 
+cleared, all values set to zero) set to one.  Again, after this sub-iteration  M 
+is subtracted from IT to form either the next iterations IT or the final 
+skeleton if c was still equal to zero.  If c is not equal to zero (i.e. the 
+thinning process is not completed) then the algorithm sets c to zero and 
+begins another iteration.
+
+4.6 Implementation
+
+Implementing this algorithm in C is very straight forward.  Each of the 
+separate conditions (a, b, c, d, c' and d') can be implemented as separate 
+subroutines, as well as the two sub-iterations.  These can then be called as 
+needed by a main subroutine.  
+
+The image matrices IT and M are defined as arrays of integers thus:
+int image[MAX_WIDTH][MAX_HEIGHT];
+int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+with image representing the matrix M and old_image matrix IT.  The 
+values for MAX_WIDTH and MAX_HEIGHT are used to restrict the size 
+of image in memory, and hence the program would have to be re-compiled 
+with these set to a larger size for images which are larger the either of 
+these values.  The maximum size of an image is actually two less than 
+both MAX_WIDTH and MAX_HEIGHT.  This is so that when the array is 
+created and the image is loaded into it there is a one pixel wide area 
+around the image (with values always set to zero) so that any attempts to 
+read values outside the array (array out of bound error) are not possible.  
+The points P1, P2, .., P9 are defined thus:
+
+#define P1 old_image[i][j]
+#define P2 old_image[i][j-1]
+#define P3 old_image[i+1][j-1]
+#define P4 old_image[i+1][j]
+#define P5 old_image[i+1][j+1]
+#define P6 old_image[i][j+1]
+#define P7 old_image[i-1][j+1]
+#define P8 old_image[i-1][j]
+#define P9 old_image[i-1][j-1]
+
+Therefore when an attempt is made to access the top left corner of the 
+image points P2, P3, P7, P8 & P9 are all outside of the image.  If the one 
+array element boundary was not in place then this would cause an 
+attempted array access out of bounds and might cause the program to 
+crash or return a random value.  Using the one array element boundary no 
+extra code has to be written to deal with pixels that are on the edges of the 
+image.
+
+4.7 Some examples of the C code.
+
+Here are three examples of the C code used, followed by an explanation of 
+what each subroutine does.  The rest of the code for the Suen and Zhang 
+algorithm can be found in Appendix A, under the file S_Z_1.c.
+4.7.1 The Suen_Zhang() Function
+
+This function represents the whole algorithm.
+
+1	void Suen_Zhang()
+2	{
+3	   int count = 0 ;
+4	   extern altered ;
+5	
+6	   Invert() ;
+7	   do
+8	   {
+9	      SZ_Sub_Iteration_1() ;
+10	      if (altered == TRUE)
+11	      {
+12	         SZ_ImageSubtract() ;
+13	         All() ;
+14	         SZ_Sub_Iteration_2() ;
+15	         if(altered == TRUE)
+16	         {
+17	            SZ_ImageSubtract() ;
+18	            All() ;
+19	         }
+20	      }
+21	      count = count + 1 ;
+22	      printf("Iteration %d completed \n", count) ;
+23	   } while (altered == TRUE) ;
+24	   printf("\nThinning completed\n") ;
+25	   Invert() ;
+26	   return ;
+27	}
+
+It is obvious what most of this functions does.  Lines 9 and 14 are the 
+sub-iteration subroutine calls, with lines 12 and 17 performing the matrix 
+subtraction (IT = IT - M).  Notice, however, that the matrix subtraction 
+has been moved to after the test to see if the image was altered (lines 10 
+and 15.)  This is a justifiable way of increasing the speed of the code.  As 
+the array image (matrix M) would consist entirely of zeros then there is no 
+point in wasting the time performing the necessary subtractions as they 
+would have no effect on the image in the array old_image (matrix IT.)
+
+The two calls to the function All() are used if output after each iteration is 
+required.  This is useful, to see what is happening during the thinning 
+process, and can be used to see if the algorithm is working correctly.
+
+4.7.2 SZ_Sub_Iteration_1()
+
+This function represents the first of the two sub-iterations.  The second 
+sub-iteration is identical, but with the calls to SZ_Condition_C() and 
+SZ_Condition_D() replaced with calls to SZ_Condition_C_Dash() and 
+SZ_Condition_D_Dash() respectively.
+
+1	void SZ_Sub_Iteration_1()
+2	{
+3	   int i, j ;
+4	   extern altered ;
+5	   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+6	   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+7	   extern int width, height ;
+8
+9	   altered = FALSE ;
+10	   printf("Sub-iteration 1 \n") ;
+11	   for(j=1; j<= height; j++)
+12	   {
+13	      for(i=1; i<= width; i++)
+14	      {
+15	         if (SZ_Edge(i,j) &&
+16	             SZ_Condition_A(i, j) &&
+17	             SZ_Condition_B(i, j) &&
+18	             SZ_Condition_C(i, j) &&
+19	             SZ_Condition_D(i, j)   )
+20      	   {
+21	             image[i][j] = 1 ;
+22	             altered = TRUE ;
+23	         }
+24	      }
+25	   }
+26	   return ;
+27	}
+
+Line 9 sets the global variable altered to false (C = 0).  Lines 15 to 19 
+contain the removal criteria tests, which if these all evaluate to true then 
+the pixel should be removed, so image[i][j] is set to one (M(i, j) = 1) and 
+altered is set to true (C = C + 1).
+
+The function SZ_Edge(i, j) determines whether the pixel is a boundary (or 
+edge)  pixel.
+
+4.7.3 The SZ_Condition_A() function
+
+This function represents the first of the removal criteria:
+	(a)	2 < B(P1) < 6
+
+int SZ_Condition_A(int i, int j)
+{
+   int No_Ones ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   No_Ones = P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 ;
+   return ((No_Ones <= 6) && (No_Ones >= 2)) ;
+}
+
+4.8 Initial testing
+
+To test to see if the algorithm does thin images as the authors suggest the 
+algorithm was tested, after the code was completed.  Two of the images 
+tested are shown in Figures. 4.3 and 4.4.  The grey pixels in the figures 4.3 
+and 4.4 show the original image for comparison.
+
+More thorough testing, including timings and comparisons can be found in 
+Chapter 10.
+
+4.9 Initial conclusions
+
+This algorithm does everything claimed.  As this is such a well referenced 
+algorithm, then it will be used as a base for all of the other tested 
+algorithms.

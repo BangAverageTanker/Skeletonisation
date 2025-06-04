@@ -1,0 +1,1171 @@
+Appendix A - Source code
+
+S_Z_1.c
+
+/******
+ *
+ * Functions to  skeletonise an image
+ * Using Suen and Zhangs Algorithm
+ *
+ * ©1995 Simon Westerby
+ *
+ ******
+
+ * Function Prototypes  */
+void Suen_Zhang(void) ;
+void SZ_ImageSubtract(void) ;
+void SZ_Sub_Iteration_1(void) ;
+void SZ_Sub_Iteration_2(void) ;
+int SZ_Condition_A(int, int) ;
+int SZ_Condition_B(int, int) ;
+int SZ_Condition_C(int, int) ;
+int SZ_Condition_D(int, int) ;
+int SZ_Condition_C_Dash(int, int) ;
+int SZ_Condition_D_Dash(int, int) ;
+int SZ_No_Of_0_1_Combis(int, int) ;
+int SZ_Edge(int, int) ;
+
+int altered ;
+
+#define P1 old_image[i][j]
+#define P2 old_image[i][j-1]
+#define P3 old_image[i+1][j-1]
+#define P4 old_image[i+1][j]
+#define P5 old_image[i+1][j+1]
+#define P6 old_image[i][j+1]
+#define P7 old_image[i-1][j+1]
+#define P8 old_image[i-1][j]
+#define P9 old_image[i-1][j-1]
+
+int SZ_Edge(int i, int j) 
+{
+	int contour ;
+
+	if ((P1 != P2) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P3) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P4) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P5) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P6) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P7) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P8) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P9) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+
+	return (contour == TRUE) ;
+}        
+
+
+
+int SZ_No_Of_0_1_Combis(int i, int j)
+/* count the number of  0 1 pairs in the ordered set p2 .. p9 */
+{
+   int count = 0;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   if ((P2 == 0) && (P3 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P3 == 0) && (P4 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P4 == 0) && (P5 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P5 == 0) && (P6 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P6 == 0) && (P7 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P7 == 0) && (P8 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P8 == 0) && (P9 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P9 == 0) && (P2 == 1))
+   {
+      count = count + 1 ;
+   }
+   return(count) ;
+}
+
+int SZ_Condition_A(int i, int j)
+{
+   int No_Ones ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   No_Ones = P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 ;
+   return ((No_Ones <= 6) && (No_Ones >= 2)) ;
+}
+
+int SZ_Condition_B(int i, int j)
+{
+   return (SZ_No_Of_0_1_Combis(i, j) == 1) ;
+}
+
+int SZ_Condition_C(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P4*P6 == 0) ;
+}
+
+int SZ_Condition_D(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P4*P6*P8 == 0) ;
+}
+
+int SZ_Condition_C_Dash(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P4*P8 == 0) ;
+}
+
+int SZ_Condition_D_Dash(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P6*P8 == 0) ;
+}
+
+void SZ_Sub_Iteration_1()
+{
+   int i, j ;
+   extern altered ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int contours[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+
+   altered = FALSE ;
+   printf("Sub-iteration 1 \n") ;
+   for(j=1; j<= height; j++)
+   {
+      for(i=1; i<= width; i++)
+      {
+         if (SZ_Edge(i,j) &&
+         	 SZ_Condition_A(i, j) &&
+             SZ_Condition_B(i, j) &&
+             SZ_Condition_C(i, j) &&
+             SZ_Condition_D(i, j)   )
+         {
+            image[i][j] = 1 ;
+            altered = TRUE ;
+         }
+      }
+   }
+   return ;
+}
+
+void SZ_Sub_Iteration_2()
+{
+   int i, j ;
+   extern altered ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int contours[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+   
+   altered = FALSE ;
+   printf("Sub-iteration 2 \n") ;
+   for(j=1; j<= height; j++)
+   {
+      for(i=1; i<= width; i++)
+      {
+         if(SZ_Edge(i, j) &&
+            SZ_Condition_A(i, j) &&
+            SZ_Condition_B(i, j) &&
+            SZ_Condition_C_Dash(i, j) &&
+            SZ_Condition_D_Dash(i, j)   )
+         {
+            image[i][j] = 1 ;
+            altered = TRUE ;
+         }
+      }
+   }
+   return ;
+}
+
+
+void SZ_ImageSubtract()
+{
+   int i, j;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+
+   for (j = 1; j <= height; j++)
+   {
+      for (i = 1; i <= width; i++)
+      {
+         old_image[i][j] = old_image[i][j] - image[i][j] ;
+         image[i][j] = 0 ;
+      }
+   }
+   return ;
+}
+      
+void Suen_Zhang()
+{
+   int count = 0 ;
+   extern altered ;
+
+   Invert() ;
+   do
+   {
+      SZ_Sub_Iteration_1() ;
+      if (altered == TRUE)
+      {
+         SZ_ImageSubtract() ;
+         All() ;
+         SZ_Sub_Iteration_2() ;
+         if(altered == TRUE)
+         {
+            SZ_ImageSubtract() ;
+            All() ;
+         }
+      }
+      count = count + 1 ;
+      printf("Iteration %d completed \n", count) ;
+   } while (altered == TRUE) ;
+   printf("\nThinning completed\n") ;
+   Invert() ;
+   return ;
+}
+
+S_Z_2.c
+
+/******
+ *
+ * Functions to  skeletonise an image
+ * Using Suen and Zhangs Algorithm
+ * Modifications by H E Lu and P S P Wang
+ *
+ *
+ * ©1995 Simon Westerby
+ *
+ ******
+
+ * Function Prototypes  */
+
+void Suen_Zhang_2(void) ;
+void SZ2_ImageSubtract(void) ;
+void SZ2_Sub_Iteration_1(void) ;
+void SZ2_Sub_Iteration_2(void) ;
+int SZ2_Condition_A(int, int) ;
+int SZ2_Condition_B(int, int) ;
+int SZ2_Condition_C(int, int) ;
+int SZ2_Condition_D(int, int) ;
+int SZ2_Condition_C_Dash(int, int) ;
+int SZ2_Condition_D_Dash(int, int) ;
+int SZ2_No_Of_0_1_Combis(int, int) ;
+int SZ2_Edge(int, int) ;
+
+int altered ;
+
+#define P1 old_image[i][j]
+#define P2 old_image[i][j-1]
+#define P3 old_image[i+1][j-1]
+#define P4 old_image[i+1][j]
+#define P5 old_image[i+1][j+1]
+#define P6 old_image[i][j+1]
+#define P7 old_image[i-1][j+1]
+#define P8 old_image[i-1][j]
+#define P9 old_image[i-1][j-1]
+
+int SZ2_Edge(int i, int j) 
+{
+	int contour ;
+
+	if ((P1 != P2) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P3) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P4) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P5) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P6) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P7) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P8) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+	if ((P1 != P9) && (P1 == 1))
+	{
+		contour = TRUE ;
+	}
+
+	return (contour == TRUE) ;
+}        
+
+         
+
+int SZ2_No_Of_0_1_Combis(int i, int j)
+/* count the number of  0 1 pairs in the ordered set p2 .. p9 */
+{
+   int count = 0;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   if ((P2 == 0) && (P3 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P3 == 0) && (P4 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P4 == 0) && (P5 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P5 == 0) && (P6 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P6 == 0) && (P7 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P7 == 0) && (P8 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P8 == 0) && (P9 == 1))
+   {
+      count = count + 1 ;
+   }
+   if ((P9 == 0) && (P2 == 1))
+   {
+      count = count + 1 ;
+   }
+   return(count) ;
+}
+
+int SZ2_Condition_A(int i, int j)
+{
+   int No_Ones = 0 ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   No_Ones = P2 + P3 + P4 + P5 + P6 + P7 + P8 + P9 ;
+
+   return ((No_Ones <= 6) && (No_Ones >= 3)) ;
+}
+
+int SZ2_Condition_B(int i, int j)
+{
+   return (SZ2_No_Of_0_1_Combis(i, j) == 1) ;
+}
+
+int SZ2_Condition_C(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P4*P6 == 0) ;
+}
+
+int SZ2_Condition_D(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P4*P6*P8 == 0) ;
+}
+
+int SZ2_Condition_C_Dash(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P4*P8 == 0) ;
+}
+
+int SZ2_Condition_D_Dash(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT];
+
+   return (P2*P6*P8 == 0) ;
+}
+
+void SZ2_Sub_Iteration_1()
+{
+   int i, j ;
+   extern altered ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+
+   altered = FALSE ;
+   printf("Sub-iteration 1 \n") ;
+   for(j=1; j<= height; j++)
+   {
+      for(i=1; i<= width; i++)
+      {
+         if(SZ2_Edge(i, j) &&
+            SZ2_Condition_A(i, j) &&
+            SZ2_Condition_B(i, j) &&
+            SZ2_Condition_C(i, j) &&
+            SZ2_Condition_D(i, j)   )
+         {
+            image[i][j] = 1 ;
+            altered = TRUE ;
+         }
+      }
+   }
+   return ;
+}
+
+void SZ2_Sub_Iteration_2()
+{
+   int i, j ;
+   extern altered ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+   
+   altered = FALSE ;
+   printf("Sub-iteration 2\n") ;
+   for(j=1; j<= height; j++)
+   {
+      for(i=1; i<= width; i++)
+      {
+         if(SZ2_Edge(i, j) &&
+            SZ2_Condition_A(i, j) &&
+		SZ2_Condition_B(i, j) &&
+            SZ2_Condition_C_Dash(i, j) &&
+            SZ2_Condition_D_Dash(i, j)   )
+         {
+            image[i][j] = 1 ;
+            altered = TRUE ;
+         }
+      }
+   }
+   return ;
+}
+
+
+void SZ2_ImageSubtract()
+{
+   int i, j;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width, height ;
+
+   for (j = 1; j <= height; j++)
+   {
+      for (i = 1; i <= width; i++)
+      {
+         old_image[i][j] = old_image[i][j] - image[i][j] ;
+         image[i][j] = 0 ;
+      }
+   }
+   return ;
+}
+      
+void Suen_Zhang_2()
+{
+   int count = 0 ;
+   extern altered ;
+
+   Invert() ;
+   do
+   {
+      SZ2_Sub_Iteration_1() ;
+      if (altered == TRUE)
+      {
+         SZ2_ImageSubtract() ;
+         All() ;
+         SZ2_Sub_Iteration_2() ;
+         if(altered == TRUE)
+         {
+            SZ2_ImageSubtract() ;
+            All() ;
+         }
+      }
+      count = count + 1 ;
+      printf("Iteration %d completed\n", count) ;
+   } while (altered == TRUE) ;
+   printf("\nThinning Completed\n") ;
+   Invert() ;
+   return ;
+}
+
+WuTsai.c
+
+/******
+ *
+ * Functions to skeletonise an image
+ * Using Wu and Tsai's Algorithm
+ *
+ *
+ * ©1995 Simon Westerby
+ *
+ ******
+
+ * Function Prototypes  */
+void Wu_Tsai(void) ;
+void WT_Remove_Point(int, int) ;
+int WT_Template_A(int, int) ;
+int WT_Template_B(int, int) ;
+int WT_Template_C(int, int) ;
+int WT_Template_D(int, int) ;
+int WT_Template_E(int, int) ;
+int WT_Template_F(int, int) ;
+int WT_Template_G(int, int) ;
+int WT_Template_H(int, int) ;
+int WT_Template_I(int, int) ;
+int WT_Template_J(int, int) ;
+int WT_Template_K(int, int) ;
+int WT_Template_L(int, int) ;
+int WT_Template_M(int, int) ;
+int WT_Template_N(int, int) ;
+
+int altered ;
+
+#define P1 old_image[i][j]
+#define P2 old_image[i][j-1]
+#define P3 old_image[i+1][j-1]
+#define P4 old_image[i+1][j]
+#define P5 old_image[i+1][j+1]
+#define P6 old_image[i][j+1]
+#define P7 old_image[i-1][j+1]
+#define P8 old_image[i-1][j]
+#define P9 old_image[i-1][j-1]
+/*
+ 1 extra for Template d
+*/
+#define P10 old_image[i][j+2]
+/*
+ 1 extra for template c 
+*/
+#define P11 old_image[i+2][j]
+
+#define BLACK 1
+#define WHITE 0
+
+int WT_Template_A(int i, int j)
+{
+   extern int altered ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P3 == WHITE) || (P5 == WHITE)) && (P4 == WHITE) &&
+            (P2 == BLACK) && (P6 == BLACK) && (P7 == BLACK) &&
+            (P8 == BLACK) && (P9 == BLACK)) ;
+}   
+   
+
+                  
+int WT_Template_B(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P5 == WHITE) || (P7 == WHITE)) && (P6 == WHITE) &&
+            (P2 == BLACK) && (P3 == BLACK) && (P4 == BLACK) &&
+            (P8 == BLACK) && (P9 == BLACK)) ;
+}   
+
+
+
+int WT_Template_C(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int width ;
+   int p11 ;
+
+   if (i > width)
+   {
+      p11 = WHITE ;
+   }
+   else
+   {
+      p11 = P11 ;
+   }
+
+   return (((P7 == WHITE) || (P9 == WHITE)) && (P8 == WHITE) && 
+            (P2 == BLACK) && (P3 == BLACK) && (P4 == BLACK) &&
+            (P5 == BLACK) && (P6 == BLACK) && (p11 = BLACK)) ;
+}
+
+
+
+int WT_Template_D(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int height ;
+   int p10 ;
+
+   if (j > height )
+   {
+      p10 = WHITE ;
+   }
+   else
+   {
+      p10 = P10 ;
+   }
+
+   return (((P9 == WHITE) || (P3 == WHITE)) && (P2 == WHITE) &&
+            (P4 == BLACK) && (P5 == BLACK) && (P6 == BLACK) &&
+            (P7 == BLACK) && (P8 == BLACK) && (p10 == BLACK)) ;
+}
+
+
+
+int WT_Template_E(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P6 == BLACK) && (P8 == BLACK)) &&
+           ((P2 == WHITE) && (P3 == WHITE) && (P4 == WHITE))) ;
+}
+
+
+
+int WT_Template_F(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P2 == BLACK) && (P3 == BLACK) && (P4 == BLACK)) &&
+           ((P6 == WHITE) && (P7 == WHITE) && (P8 == WHITE))) ;
+}
+
+
+
+int WT_Template_G(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P2 == BLACK) && (P4 == BLACK)) &&
+           ((P3 == WHITE) && (P5 == WHITE) && (P6 == WHITE)) &&
+           ((P7 == WHITE) && (P8 == WHITE) && (P9 == WHITE))) ;
+}
+
+
+
+int WT_Template_H(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P2 == BLACK) && (P8 == BLACK)) &&
+           ((P4 == WHITE) && (P5 == WHITE) && (P6 == WHITE))) ;
+}
+
+
+
+int WT_Template_I(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P4 == BLACK) && (P5 == BLACK) && (P6 == BLACK)) &&
+           ((P8 == WHITE) && (P9 == WHITE) && (P2 == WHITE))) ;
+}
+
+
+
+int WT_Template_J(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P4 == BLACK) && (P6 == BLACK)) &&
+           ((P2 == WHITE) && (P3 == WHITE) && (P5 == WHITE)) &&
+           ((P7 == WHITE) && (P8 == WHITE) && (P9 == WHITE))) ;
+}
+
+
+
+int WT_Template_K(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P5 == BLACK) && (P6 == BLACK) && (P7 == BLACK)) &&
+           ((P2 == WHITE) && (P3 == WHITE) && (P4 == WHITE)) &&
+           ((P8 == WHITE) && (P9 == WHITE))) ;
+}
+
+
+
+int WT_Template_L(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P7 == BLACK) && (P8 == BLACK) && (P9 == BLACK)) &&
+           ((P2 == WHITE) && (P3 == WHITE) && (P4 == WHITE)) &&
+           ((P5 == WHITE) && (P6 == WHITE))) ;
+}
+
+
+
+int WT_Template_M(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P2 == BLACK) && (P3 == BLACK) && (P9 == BLACK)) &&
+           ((P4 == WHITE) && (P5 == WHITE) && (P6 == WHITE)) &&
+           ((P7 == WHITE) && (P8 == WHITE))) ;
+}
+
+
+
+int WT_Template_N(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return (((P3 == BLACK) && (P4 == BLACK) && (P5 == BLACK)) &&
+           ((P6 == WHITE) && (P7 == WHITE) && (P8 == WHITE)) &&
+           ((P9 == WHITE) && (P2 == WHITE))) ;
+}
+
+
+
+void WT_Remove_Point(int i, int    j)
+{
+   extern int altered ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   if (P1 == BLACK)
+   {
+      if (WT_Template_A(i, j) ||
+          WT_Template_B(i, j) ||
+          WT_Template_C(i, j) ||
+          WT_Template_D(i, j) ||
+          WT_Template_E(i, j) ||
+          WT_Template_F(i, j) ||
+          WT_Template_G(i, j) ||
+          WT_Template_H(i, j) ||
+          WT_Template_I(i, j) ||
+          WT_Template_J(i, j) ||
+          WT_Template_K(i, j) ||
+          WT_Template_L(i, j) ||
+          WT_Template_M(i, j) ||
+          WT_Template_N(i, j)   )
+      {
+	   altered = TRUE ;
+         image[i][j]  = WHITE ;
+      }
+   }
+   return ;
+}
+
+
+
+void Wu_Tsai()
+{
+   int i, j ;
+   int count = 0 ;
+   extern int width, height; 
+   extern int altered ;
+
+   Invert() ;
+   Old_Image_2_Image() ;
+   do
+   {
+      altered = FALSE ;
+      count = count + 1 ;
+      printf("Iteration %d \n", count) ;
+      for (j = 1; j <= height; j++)
+      {
+         for (i = 1; i <= width; i++)
+         {
+            WT_Remove_Point(i, j) ;
+         }
+      }
+      Image_2_Old_Image() ;
+      All() ;
+   } while (altered == TRUE) ;
+   printf("\nThinning completed\n") ;
+   Invert() ;
+   return ;
+}
+
+Stewart.c
+
+/******
+ *
+ * Functions to  skeletonise an image
+ * Using Wu and Tsai's Algorithm
+ * modified by Stewart.
+ *
+ * ©1995 Simon Westerby
+ *
+ ******
+
+ * Function Prototypes  */
+void Stewart(void) ;
+void S_Remove_Point(int, int) ;
+int S_Edge(int, int) ;
+int S_Protected(int, int) ;
+
+#define C  (old_image[i][j] == BLACK)
+#define N  (old_image[i][j-1] == BLACK)
+#define S  (old_image[i][j+1] == BLACK)
+#define E  (old_image[i+1][j] == BLACK)
+#define W  (old_image[i-1][j] == BLACK)
+#define NE (old_image[i+1][j-1] == BLACK)
+#define SE (old_image[i+1][j+1] == BLACK)
+#define NW (old_image[i-1][j-1] == BLACK)
+#define SW (old_image[i-1][j+1] == BLACK)
+
+#define c   i, j
+#define n   i, j-1
+#define s   i, j+1
+#define e   i+1, j
+#define w   i-1, j
+#define ne  i+1, j-1
+#define nw  i-1, j-1
+#define se  i+1, j+1
+#define sw  i-1, j+1
+
+int altered ;
+int debug ;
+
+#define P1 old_image[i][j]
+
+#define BLACK 1
+#define WHITE 0
+
+int S_Edge(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   
+   return (C && ((W && !E) && (((NW && SW) && ((N || !NE) && (S || !SE))) || (S && !(N || NE))) ||
+                 (N && !S) && (((NW && NE) && ((E || !SE) && (W || !SW))) || (W && !(E || SE))) ||
+                 (E && !W) && (((NE && SE) && ((S || !SW) && (N || !NW))) || (N && !(S || SW))) ||
+                 (S && !N) && (((SW && SE) && ((W || !NW) && (E || !NE))) || (E && !(W || NW)))  
+                )
+             ) ;
+}
+
+int S_Protected(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   
+   return (!S_Edge(c)
+        || (S_Edge(e) && N && S)
+        || (S_Edge(s) && W && E)
+        || (!SE && S && E && (S_Edge(s) || S_Edge(e)))
+        || (!SW && W && S && (S_Edge(w) || S_Edge(s)))
+        || (S_Edge(e) && S_Edge(s) && S_Edge(se))     );
+}
+
+void S_Remove_Point(int i, int j)
+{
+   extern int altered ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int debug ;
+   int value = 0 ;
+
+   if (debug == DEBUG)
+   {
+      if (P1 == BLACK)
+      {
+         if (S_Edge(i, j))
+         {
+            value = value + 1 ;
+            if (!S_Protected(i, j))
+            {
+               altered = TRUE ;
+               image[i][j] = WHITE ;
+            }
+            else
+            {
+               value = value + 2 ;
+            }
+         }
+         else
+         {
+            if (S_Protected(i, j))
+            {
+               value = value + 2 ;
+            }
+         }
+      }
+      printf("%d", value) ;
+   }
+   else
+   {
+      if (P1 == BLACK)
+      {
+         if (S_Edge(i, j) && (!S_Protected(i, j)))
+          {
+            altered = TRUE ;
+            image[i][j]  = WHITE ;
+         }
+      }
+   }
+   return ;
+}
+
+
+
+void Stewart()
+{
+   int i, j ;
+   int count = 0 ;
+   extern int width, height; 
+   extern int altered ;
+   extern int debug ;
+
+   Invert() ;
+   Old_Image_2_Image() ;
+   do
+   {
+      altered = FALSE ;
+      count = count + 1 ;
+      printf("Iteration %d \n", count) ;
+      for (j = 1; j <= height; j++)
+      {
+         for (i = 1; i <= width; i++)
+         {
+            S_Remove_Point(i, j) ;
+         }
+         if (debug == DEBUG)
+         {
+            printf("\n") ;
+         }
+      }
+      Image_2_Old_Image() ;
+   } while (altered == TRUE) ;
+   Invert() ;
+   return ;
+}      
+HCSP.c
+
+/******
+ *
+ * Functions to  skeletonise an image
+ * Using the Holt et al. Algorithm
+ *
+ * ©1995 Simon Westerby 
+ *
+ ******
+
+ * Function Prototypes  */
+void Holt(void) ;
+void HSCP_Remove_Point(int, int) ;
+int HSCP_Edge(int, int) ;
+void HSCP_Check(int, int, int) ;
+int HSCP_Protected(int, int) ;
+/*
+ * Global variables 
+ */
+int altered ;
+int debug ;
+int edge [MAX_WIDTH][MAX_HEIGHT] ;
+int t00, t01, t01s, t11 ;
+
+#define C  old_image[i][j]
+#define N  old_image[i][j-1]
+#define NE old_image[i+1][j-1]
+#define E  old_image[i+1][j]
+#define SE old_image[i+1][j+1]
+#define S  old_image[i][j+1]
+#define SW old_image[i-1][j+1]
+#define W  old_image[i-1][j]
+#define NW old_image[i-1][j-1]
+
+#define c   i, j
+#define n   i, j-1
+#define s   i, j+1
+#define e   i+1, j
+#define w   i-1, j
+#define ne  i+1, j-1
+#define nw  i-1, j-1
+#define se  i+1, j+1
+#define sw  i-1, j+1
+
+#define BLACK 1
+#define WHITE 0
+
+int HSCP_Edge(int i, int j)
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   int edge = 0 ;
+   extern int t00 ;
+   extern int t01 ;
+   extern int t01s ;
+   extern int t11 ;
+
+   t00 = FALSE ;
+   t01 = FALSE ;
+   t01s = FALSE ;
+   t11 = FALSE ;   
+
+   HSCP_Check (NW, N, NE) ;
+   HSCP_Check (NE, E, SE) ;
+   HSCP_Check (SE, S, SW) ;
+   HSCP_Check (SW, W, NW) ;
+
+   edge = ((C==BLACK)&&(t00==TRUE)&&(t11==TRUE)&&(t01s==FALSE)) ;
+   
+   return (edge) ;
+}
+
+void HSCP_Check(int v1, int v2, int v3)
+{
+   extern int t00, t01, t01s, t11 ;
+
+   if ((v2 == WHITE) && ((v1 == WHITE) || (v3 == WHITE)))
+   {
+      t00 = TRUE ;
+   }
+   if ((v2 == BLACK) && ((v1 == BLACK) || (v3 == BLACK)))
+   {
+      t11 = TRUE ;
+   }
+   if (((v1==WHITE)&&(v2==BLACK))||((v2==WHITE)&&(v3==BLACK)))
+   {
+      t01s = t01 ;
+      t01 = TRUE ;
+   }
+   return ;
+}
+
+int HSCP_Protected(int i, int j) 
+{
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+
+   return ((C == BLACK) && ((!HSCP_Edge(c)) || 
+                (HSCP_Edge(e) && (N == BLACK) && (S == BLACK)) ||
+                (HSCP_Edge(s) && (W == BLACK) && (E == BLACK)) ||
+                (HSCP_Edge(e) && HSCP_Edge(se) && HSCP_Edge(s))  )
+          ) ;
+}
+
+
+void HSCP_Remove_Point(int i, int j)
+{
+   extern int altered ;
+   extern int old_image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int image[MAX_WIDTH][MAX_HEIGHT] ;
+   extern int debug ;
+   int value = 0 ;
+
+   if (debug == DEBUG)
+   {
+      if (C == BLACK)
+      {
+         if (HSCP_Edge(i, j))
+         {
+            value = value + 1 ;
+            if (!HSCP_Protected(i, j))
+            {
+               altered = TRUE ;
+               image[i][j] = WHITE ;
+            }
+            else
+            {
+               value = value + 2 ;
+            }
+         }
+         else
+         {
+            if (HSCP_Protected(i, j))
+            {
+               value = value + 2 ;
+            }
+         }
+      }
+      printf("%d", value) ;
+   }
+   else
+   {
+      if (C == BLACK)
+      {
+         if (HSCP_Edge(i, j))
+         {
+            if (!HSCP_Protected(i, j))
+             {
+               altered = TRUE ;
+               image[i][j]  = WHITE ;
+            }
+         }
+      }
+   }
+   return ;
+}
+
+
+
+void Holt()
+{
+   int i, j ;
+   int count = 0 ;
+   extern int width, height; 
+   extern int altered ;
+   extern int debug ;
+
+   Invert() ;
+   Old_Image_2_Image() ;
+   do
+   {
+      altered = FALSE ;
+      count = count + 1 ;
+      printf("Iteration %d \n", count) ;
+      for (j = 1; j <= height; j++)
+      {
+         for (i = 1; i <= width; i++)
+         {
+            HSCP_Remove_Point(i, j) ;
+         }
+         if (debug == DEBUG)
+         {
+            printf("\n\n") ;
+         }
+      }
+      Image_2_Old_Image() ;
+   } while (altered == TRUE) ;
+   printf("Thinning completed.\n") ;
+   Invert() ;
+   return ;
+}      
+
+

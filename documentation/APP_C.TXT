@@ -1,0 +1,74 @@
+Appendix C - User Guide
+
+	S_Z_1_Module	- Suen and Zhang thinning executable.
+	S_Z_2_Module	- Lu and Wang thinning executable.
+	WuTsai_Module 	- Wu and Tsai thinning executable.
+	Stewart_Module	- Stewart thinning executable.
+	HCSP_Module	- Holt et al. thinning executable.
+
+SYNOPSIS
+	Executable programs to thin an image using a variety of different 
+	algorithms.
+
+FORMAT
+	<module name> <from file> <save format> [<to file>]
+
+EXPLANATION
+	Each one of the five executables uses a different algorithm to thin 
+	down an image to its skeleton.  They are all compiled around the 
+	same driver program so all have the same command line 
+	arguments.
+
+KEYWORDS
+	<Module name>
+		This is the name of the thinning method required.
+	<from file>
+		This is an image file to be thinned.  This should be stored as 
+		an uncompressed one bit per pixel Sun Rasterfile.
+	<save format>
+		This is a flag which indicates what type of save format, and 
+		what level of output is required.  This has to be one these 
+		options;
+
+		NON 	- No output file is created, and is only used for speed 
+			tests.
+		ASC	- This saves the image to an ASCII text file as a 
+			pattern of zeros and ones.
+		SUN	- This save the image to a one bit per pixel Sun 
+			rasterfile.
+		VDU	-This draws the image on the current terminal output 
+			device (screen etc.) as a pattern of ones and zeros.
+		ALL	-This is similar to the VDU option, except it draws the 
+			image after every iteration.  The output produced 
+			depends on the algorithm implemented.  	
+		S_Z_1_Module, S_Z_2_Module and WuTsai_Module all 
+		produce an image like the final output.  		
+		Stewart_Module and HCSP_Module produce more 	
+		detailed output.  It consists of data consisting of four 
+		possible outputs.
+			0	- Background data.
+			1	- Image data that has been removed.
+			2	- Image data not effected by that iteration.
+			3	- Image data that should have been removed but 
+				was protected. 
+	[<to file>]
+		This argument is only needed if either ASC or SUN was 
+		specified as the save format.  It is the name of the file the 
+		thinned image data is saved to.
+
+EXAMPLE
+	Assuming an image called 'image.ras' needs to be thinned using the 
+	S_Z_1_Module, creating an ASCII text file called 'thinned.asc'.
+
+	S_Z_1_Module image.ras ASC thinned.asc
+
+LIMITATIONS
+	Due to the size of the executables on the UNIX system, the module 
+	have been restricted to a maximum image size of 120x120 pixels.
+
+LOCATION
+	The executable programs and source code can be found in the 
+	directory ~cme92141/Project/Final_Code/ and some suitable 
+	test images can be found in the directory 
+	~cme92141/Project/Images/.
+

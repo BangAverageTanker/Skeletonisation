@@ -1,0 +1,120 @@
+Table of Contents
+1 Introduction 	6
+1.1 Background	6
+1.2 Skeletonisation (thinning) explained	6
+1.3 Requirements of a good thinning algorithm	7
+1.4 Aims 	7
+1.5 Design Strategy 	7
+2 Investigations	9
+2.1 Converting the Supplied Algorithms	9
+2.2 Choosing an Image Storage Format	9
+2.3 Why Chose ANSI 'C'	10
+3 Image Loading	11
+3.1 Rasterfile format	11
+3.2 rasterfile.h 	12
+3.3 Design for a Rasterfile loader	12
+3.4 The Get_Bit() function	13
+3.5 Using Get_Bit()	14
+3.6 Design for a Rasterfile saver	15
+3.7 The Set_Bit() function	16
+3.8 Using Set_Bit()	17
+4 Suen and Zhang's Algorithm	18
+4.1 Background	18
+4.2 Removal criteria	18
+4.3 Errors present and other ambiguities  	19
+4.4 Pseudo code	20
+4.4.1 The thinning routine	20
+4.4.2 Sub-iteration one 	20
+4.4.3 Sub-iteration two 	21
+4.4.4 Condition a	21
+4.4.5 Condition b	22
+4.4.10 Number of zero - one pairs	23
+4.5 Explanation of the execution cycle	24
+4.6 Implementation	24
+4.7 Some examples of the C code.	25
+4.7.1 The Suen_Zhang() Function	26
+4.7.2 SZ_Sub_Iteration_1()	27
+4.7.3 The SZ_Condition_A() function	27
+4.8 Initial testing	28
+4.9 Initial conclusions	28
+	iii
+5 Lu and Wang's Algorithm	29
+5.1 Background	29
+4.2 Disadvantages	29
+5.3 Partial Solutions	30
+5.4 Modifying the code	31
+5.5 Initial conclusions	31
+6 Wu and Tsai's algorithm	32
+6.1 Background	32
+6.2 Thinning templates	32
+6.3 Supplied algorithm	33
+6.4 Explanation of the execution cycle	33
+6.6 Implementation	34
+6.7 Some examples of the C code	36
+6.7.1 The Wu_Tsai() function	36
+6.7.2 The WT_Remove_Point() function	37
+6.7.3 The WT_Template_C() function	38
+6.7.4 The WT_Template_D() function	39
+6.8 Initial testing	39
+6.9 Initial conclusions	40
+7 Stewarts Algorithm	41
+7.1 Background	41
+7.2 Modified templates used	41
+7.3 Using the templates	42
+7.4 Discussion of the execution cycle	44
+7.5 Pseudo code	44
+7.6 Implementation	44
+7.6.1 The S_Edge() function	45
+7.6.2 The S_Protected() function	45
+7.7 Initial testing	46
+7.8 Initial conclusions	46
+8 Holt et al.'s Algorithm	47
+8.1 Background	47
+8.2 Deletion criteria	47
+8.3 The edge function	47
+8.5 Discussion of the execution cycle	48
+8.6 Pseudo code	49
+8.7 Implementation	49
+8.7.1 The HSCP_Check() and HSCP_Edge() functions	50
+8.8 Initial testing	52
+	iv
+8.9 Initial conclusions	52
+9 Support Code	53
+9.1 Background	53
+9.2 File structure	53
+9.3 Functions in 'Misc.c'	53
+10 Testing the algorithms	55
+10.1 Images used in the testing the algorithms	55
+10.2 Suen and Zhangs algorithm	55
+10.3 Lu and Wangs algorithm	56
+10.4 Wu and Tsais algorithm	56
+10.5 Stewarts Algorithm	57
+10.6 Holt et al.s' algorithm	57
+10.7 Timings	57
+10.8 Test results	59
+11 Conclusion	60
+11.1 Overall effectiveness	60
+11.2 Aims of the project	60
+11.3 Constraints	60
+Appendix A - Source code	62
+S_Z_1.c	62
+S_Z_2.c	65
+WuTsai.c	68
+Stewart.c	72
+HCSP.c	73
+Appendix B - Support code	77
+misc.c	77
+rasterfile.c	79
+Appendix C - User Guide	84
+Appendix D - Project Specification	86
+
+
+
+
+
+
+
+
+
+
+	v

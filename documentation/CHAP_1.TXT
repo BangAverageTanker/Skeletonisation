@@ -1,0 +1,81 @@
+1 Introduction 
+
+1.1 Background
+
+A well-known problem of pattern recognition is that of the effectiveness 
+and efficiency of extracting the distinctive features of a pattern.  By 
+thinning an image it becomes easier to identify these distinctive patterns.   
+
+1.2 Skeletonisation (thinning) explained
+
+Thinning is a process which removes the outer points of an image.  The 
+remaining points form a skeleton of the image, hence the thinning 
+procedure is known as skeletonisation.   As the thinning process often 
+removes large amounts of data, subsequent image processing tasks are 
+made a lot easier. 
+
+Several thinning algorithms have been supplied, these falling into three 
+main methodologies:
+
+i) 	Multiple-pass algorithm - these consist of several sub-iterations, 
+each with a different directional bias  (e.g. Suen and Zhang's algorithm 
+(1984) has two sub-iterations,  the first processing points along the south 
+east edges, and the second (providing that the skeleton has not already 
+been computed) processes points along the north west edges.)
+
+ii)	One pass-algorithm - these are defined in such a way that they 
+"protect" certain patterns within the image, which prevents the erosion of 
+images or any loss of connectivity (e.g. Holt's algorithm protects lines of 
+thickness two and isolated two by two squares.)
+
+iii)	A grid may be partitioned into disjoint sets of pixels where the 
+computations of the elements of each the sets are independent (i.e. a chess 
+board effect.)  Each of these sets can them be processed in parallel in a 
+sub-iteration (e.g. Olsezewski's algorithm (1992) partitions a grid into four 
+sets depending on the  (x, y) Cartesian coordinates of the pixel.)
+
+Algorithms also fall into one of two categories:
+
+i)	Serial - where the connectivity of each pixel is calculated one after 
+the other depending on its neighbouring pixels within the image.
+
+ii)	Parallel - where the connectivity of each pixel is determined by the 
+pixels neighbours in the previous iteration (or sub-iteration.)
+
+
+1.3 Requirements of a good thinning algorithm
+
+The requirements that should be met by a thinning algorithm include
+·	preservation of geometric and topological properties,
+·	isotropity,
+·	reconstructability,
+·	high processing speed.
+
+With iterative algorithms complete isotropy is almost impossible to 
+achieve, and reconstructablility is not possible (due to the fact that 
+generated skeletons are not generally the centres of maximal blocks, with 
+know radii.)  With this in mind the algorithms implemented will be tested 
+on there preservation of the image and the processing speed of the 
+algorithm.
+
+1.4 Aims 
+
+The aim of this project was to implement and test several supplied 
+thinning algorithms (from the one-pass and multi-pass methodologies) and 
+to find the most appropriate, with a particular interest in the thinning of  
+cell structure images.  The output from the chosen algorithm(s) can then 
+be used to calculate the hexagonality of cells within a retinal cell 
+structure.
+
+1.5 Design Strategy 
+
+The chosen design strategy will be an incremental design lifecycle[1].  This 
+follows the pattern:
+
+A little analysis.
+A little design.
+A little programming.
+Repeat.
+
+This approach will allow the re-use of code within similar algorithms with 
+very little effort.
